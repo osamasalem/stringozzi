@@ -5,6 +5,13 @@ CMAKE_MINIMUM_REQUIRED (VERSION 2.6)
 PROJECT(stringozzi CXX)
 
 #********************************************************
+# Perform Stringozzi tests and generate Coverage
+#********************************************************
+ADD_CUSTOM_TARGET(stringozzi.check ALL cppcheck.exe  --enable=all ../src/parser.cpp ../include/parser.h ../test/parser.test.cpp
+                  COMMENT "Static check of C++ Check"
+)
+
+#********************************************************
 # Compiler Configuration
 #********************************************************
 
