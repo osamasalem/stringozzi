@@ -46,17 +46,17 @@ typedef char Char;
 #define STRCHR strchr
 #define STDSTRING std::string
 #endif
-#define LIB_REFERENCE
+//#define LIB_REFERENCE
 
-/*
 #if defined _MSC_VER
+#pragma warning( disable : 4251 ) 
 #ifdef DLLEXPORT
 #define LIB_REFERENCE __declspec(dllexport)
-#elif defined(DLLIMPORT)
+#else
 #define LIB_REFERENCE __declspec(dllimport)
 #endif	
 #endif
-*/
+
 
 /*!
  * @namespace 	Parsing
@@ -614,7 +614,7 @@ namespace Stringozzi
 
 			};
 
-			extern Any ANY;
+			extern LIB_REFERENCE Any ANY;
 
 			/*!
 			* @class In
@@ -681,7 +681,7 @@ namespace Stringozzi
 
 			};
 			
-			extern Alphabet ALPHABET;
+			extern LIB_REFERENCE Alphabet ALPHABET;
 
 
 			/*!
@@ -704,7 +704,7 @@ namespace Stringozzi
 
 			};
 			
-			extern Digit DIGIT;
+			extern LIB_REFERENCE Digit DIGIT;
 			//Class Octal
 			/*!
 			* @class Hex
@@ -725,7 +725,7 @@ namespace Stringozzi
 
 			};
 			
-			extern Hex HEX;
+			extern LIB_REFERENCE Hex HEX;
 			/*!
 			* @class AlphaNumeric
 			* @brief	Checks if the character unnder processing is an alphabet letter
@@ -745,7 +745,7 @@ namespace Stringozzi
 
 			};
 			
-			extern AlphaNumeric ALPHANUMERIC;
+			extern LIB_REFERENCE AlphaNumeric ALPHANUMERIC;
 			
 
 			/*!
@@ -806,7 +806,7 @@ namespace Stringozzi
 				virtual bool Check(Char**)const ;
 
 			};
-			extern WhiteSpace WHITESPACE;
+			extern LIB_REFERENCE WhiteSpace WHITESPACE;
 			
 			/*!
 			* @class Is
@@ -823,7 +823,7 @@ namespace Stringozzi
 
 				Char _Letter;
 			public:
-				 Is(const Char c) :letter(c) {}
+				 Is(const Char c) :_Letter(c) {}
 				// Is(const Char* s) :letter(s[0]) {}
 				virtual bool Check(Char**)const ;
 
@@ -850,7 +850,7 @@ namespace Stringozzi
 				virtual bool Check(Char**)const ;
 
 			};
-			extern Decimal 	DECIMAL;
+			extern LIB_REFERENCE Decimal 	DECIMAL;
 
 			/*!
 			* @class Word
@@ -872,7 +872,7 @@ namespace Stringozzi
 				virtual bool Check(Char**)const ;
 
 			};
-			extern Word	WORD;
+			extern LIB_REFERENCE  Word	WORD;
 
 			/*!
 			* @class EndOfText
@@ -893,7 +893,7 @@ namespace Stringozzi
 				virtual bool Check(Char**)const ;
 
 			};
-			extern EndOfText EOT;
+			extern LIB_REFERENCE EndOfText EOT;
 
 
 			/*!
@@ -911,7 +911,7 @@ namespace Stringozzi
 				virtual bool Check(Char**)const ;
 
 			};
-			extern EndOfLine EOL;
+			extern LIB_REFERENCE EndOfLine EOL;
 
 			/*!
 			* @class Integer
@@ -993,7 +993,7 @@ namespace Stringozzi
 				virtual bool Check(Char**)const ;
 
 			};
-			extern IPv4 IPV4;
+			extern LIB_REFERENCE IPv4 IPV4;
 
 			/*!
 			* @class Host
@@ -1008,7 +1008,7 @@ namespace Stringozzi
 
 			};
 			
-			extern Host  HOST;
+			extern LIB_REFERENCE Host  HOST;
 
 			/*!
 			* @class Email
@@ -1020,7 +1020,7 @@ namespace Stringozzi
 			{
 			public:	virtual bool Check(Char**)const ;
 			};
-			extern Email EMAIL;
+			extern LIB_REFERENCE Email EMAIL;
 
 			/*!
 			* @class Phone
@@ -1032,7 +1032,7 @@ namespace Stringozzi
 			{
 			public:	virtual bool Check(Char**)const ;
 			};
-			extern Phone PHONE;
+			extern LIB_REFERENCE Phone PHONE;
 
 			/*!
 			* @class ServerAddress
@@ -1044,7 +1044,7 @@ namespace Stringozzi
 			{
 			public:	virtual bool Check(Char**)const ;
 			};
-			extern ServerAddress SERVERADDRESS;
+			extern LIB_REFERENCE  ServerAddress SERVERADDRESS;
 
 			/*!
 			* @class URI
@@ -1056,7 +1056,7 @@ namespace Stringozzi
 			{
 			public:	virtual bool Check(Char**)const ;
 			};
-			extern Uri URI;
+			extern LIB_REFERENCE Uri URI;
 
 		}
 

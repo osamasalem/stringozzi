@@ -12,22 +12,22 @@ using namespace Stringozzi::Rules::Manipulators;
 using namespace Stringozzi::Rules::Filters;
 using namespace Stringozzi::Rules::Utils;
 
-Stringozzi::Rules::Filters::Any Stringozzi::Rules::Filters::ANY;
-Stringozzi::Rules::Filters::Alphabet Stringozzi::Rules::Filters::ALPHABET;
-Stringozzi::Rules::Filters::AlphaNumeric Stringozzi::Rules::Filters::ALPHANUMERIC;
-Stringozzi::Rules::Filters::Digit Stringozzi::Rules::Filters::DIGIT;
-Stringozzi::Rules::Filters::Decimal Stringozzi::Rules::Filters::DECIMAL;
-Stringozzi::Rules::Filters::EndOfLine Stringozzi::Rules::Filters::EOL;
-Stringozzi::Rules::Filters::EndOfText Stringozzi::Rules::Filters::EOT;
-Stringozzi::Rules::Filters::Hex Stringozzi::Rules::Filters::HEX;
-Stringozzi::Rules::Filters::WhiteSpace Stringozzi::Rules::Filters::WHITESPACE;
-Stringozzi::Rules::Filters::Word Stringozzi::Rules::Filters::WORD;
-Stringozzi::Rules::Utils::Email Stringozzi::Rules::Utils::EMAIL;
-Stringozzi::Rules::Utils::Host Stringozzi::Rules::Utils::HOST;
-Stringozzi::Rules::Utils::IPv4 Stringozzi::Rules::Utils::IPV4;
-Stringozzi::Rules::Utils::Phone Stringozzi::Rules::Utils::PHONE;
-Stringozzi::Rules::Utils::ServerAddress Stringozzi::Rules::Utils::SERVERADDRESS;
-Stringozzi::Rules::Utils::Uri Stringozzi::Rules::Utils::URI;
+LIB_REFERENCE Stringozzi::Rules::Filters::Any Stringozzi::Rules::Filters::ANY;
+LIB_REFERENCE Stringozzi::Rules::Filters::Alphabet Stringozzi::Rules::Filters::ALPHABET;
+LIB_REFERENCE Stringozzi::Rules::Filters::AlphaNumeric Stringozzi::Rules::Filters::ALPHANUMERIC;
+LIB_REFERENCE Stringozzi::Rules::Filters::Digit Stringozzi::Rules::Filters::DIGIT;
+LIB_REFERENCE Stringozzi::Rules::Filters::Decimal Stringozzi::Rules::Filters::DECIMAL;
+LIB_REFERENCE Stringozzi::Rules::Filters::EndOfLine Stringozzi::Rules::Filters::EOL;
+LIB_REFERENCE Stringozzi::Rules::Filters::EndOfText Stringozzi::Rules::Filters::EOT;
+LIB_REFERENCE Stringozzi::Rules::Filters::Hex Stringozzi::Rules::Filters::HEX;
+LIB_REFERENCE Stringozzi::Rules::Filters::WhiteSpace Stringozzi::Rules::Filters::WHITESPACE;
+LIB_REFERENCE Stringozzi::Rules::Filters::Word Stringozzi::Rules::Filters::WORD;
+LIB_REFERENCE Stringozzi::Rules::Utils::Email Stringozzi::Rules::Utils::EMAIL;
+LIB_REFERENCE Stringozzi::Rules::Utils::Host Stringozzi::Rules::Utils::HOST;
+LIB_REFERENCE Stringozzi::Rules::Utils::IPv4 Stringozzi::Rules::Utils::IPV4;
+LIB_REFERENCE Stringozzi::Rules::Utils::Phone Stringozzi::Rules::Utils::PHONE;
+LIB_REFERENCE Stringozzi::Rules::Utils::ServerAddress Stringozzi::Rules::Utils::SERVERADDRESS;
+LIB_REFERENCE Stringozzi::Rules::Utils::Uri Stringozzi::Rules::Utils::URI;
 
 namespace Stringozzi
 {
@@ -235,7 +235,7 @@ namespace Stringozzi
 			bool Exact::Check(Char** _Stream)const 
 			{
 				Char* _StreamCursor = *_Stream;
-				Char* _InputCursor = _Input;
+				const Char* _InputCursor = _Input;
 				if (!*_InputCursor)
 					return false;
 
@@ -328,7 +328,7 @@ namespace Stringozzi
 				float ret = STRTOF(temp, &temp);
 				if (temp == *_Stream)	
 					return false;
-				if (ret >= min && ret <= max)
+				if (ret >= _Min && ret <= _Max)
 				{
 					*_Stream = temp;
 					return true;
