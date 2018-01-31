@@ -46,7 +46,6 @@ typedef char Char;
 #define STRCHR strchr
 #define STDSTRING std::string
 #endif
-//#define LIB_REFERENCE
 
 #if defined _MSC_VER
 #pragma warning( disable : 4251 ) 
@@ -54,7 +53,9 @@ typedef char Char;
 #define LIB_REFERENCE __declspec(dllexport)
 #else
 #define LIB_REFERENCE __declspec(dllimport)
-#endif	
+#endif
+#else
+#define LIB_REFERENCE
 #endif
 
 
@@ -1106,11 +1107,12 @@ inline Stringozzi::Rules::Manipulators::Within operator *(const Stringozzi::Rule
 	return Stringozzi::Rules::Manipulators::Within(range.Minimum, range.Maximum, tok);
 }
 
-inline Stringozzi::Rules::Manipulators::Within operator *(const Stringozzi::Rules::TokenizerInterface& tok, std::initializer_list<int> times)
+/* inline Stringozzi::Rules::Manipulators::Within operator *(const Stringozzi::Rules::TokenizerInterface& tok, std::initializer_list<int> times)
 {
 	return Stringozzi::Rules::Manipulators::Within(*times.begin() , *times.end(), tok);
 }
-
+ */
+ 
 inline Stringozzi::Rules::Manipulators::Or operator | (const Stringozzi::Rules::TokenizerInterface& t1, const Stringozzi::Rules::TokenizerInterface& t2)
 {
 	return Stringozzi::Rules::Manipulators::Or(t1, t2);
