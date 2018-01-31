@@ -7,7 +7,7 @@ PROJECT(stringozzi CXX)
 #********************************************************
 # Perform Stringozzi tests and generate Coverage
 #********************************************************
-ADD_CUSTOM_TARGET(stringozzi.check ALL cppcheck.exe  --enable=all ../src/parser.cpp ../include/parser.h ../test/parser.test.cpp
+ADD_CUSTOM_TARGET(stringozzi.check ALL cppcheck  --enable=all ../src/parser.cpp ../include/parser.h ../test/parser.test.cpp
                   COMMENT "Static check of C++ Check"
 )
 
@@ -56,7 +56,7 @@ ADD_TEST(stringozzi.test stringozzi.test)
 #********************************************************
 # Perform Stringozzi tests and generate Coverage
 #********************************************************
-ADD_CUSTOM_TARGET(stringozzi.coverage ALL opencppcoverage.exe --source stringozzi\\src   -- ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/stringozzi.test.exe
+ADD_CUSTOM_TARGET(stringozzi.coverage ALL opencppcoverage --source stringozzi\\src   -- ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/stringozzi.test${CMAKE_EXECUTABLE_SUFFIX}
                   DEPENDS stringozzi.test 
                   COMMENT "Run tests and generate coverage boards"
 )
@@ -64,7 +64,7 @@ ADD_CUSTOM_TARGET(stringozzi.coverage ALL opencppcoverage.exe --source stringozz
 #********************************************************
 # Generate Documentation
 #********************************************************
-ADD_CUSTOM_TARGET(stringozzi.doc ALL doxygen.exe docs/Doxyfile
+ADD_CUSTOM_TARGET(stringozzi.doc ALL doxygen docs/Doxyfile
                   DEPENDS stringozzi.test 
 				  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
                   COMMENT "Generate Documentation"
