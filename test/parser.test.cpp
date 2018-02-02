@@ -23,9 +23,8 @@
 // DEALINGS IN THE SOFTWARE.
 
 
-#include "gtest\gtest.h"
+#include "gtest/gtest.h"
 #include "parser.h"
-#include <conio.h>
 
 using namespace Stringozzi;
 using namespace Stringozzi::Rules;

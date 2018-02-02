@@ -27,6 +27,7 @@
 #include <string>
 #include <vector>
 #include <stack>
+#include <cstring>
 
 //#define USE_WCHAR
 #if defined USE_WCHAR

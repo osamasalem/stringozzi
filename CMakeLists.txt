@@ -16,6 +16,7 @@ PROJECT(stringozzi CXX)
 #********************************************************
 
 INCLUDE_DIRECTORIES( include/ )
+
 #SET( CMAKE_RUNTIME_OUTPUT_DIRECTORY 		bin)
 #SET( CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG 	${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 #SET( CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
@@ -41,8 +42,6 @@ ADD_LIBRARY( stringozzi-shared SHARED		src/parser.cpp )
 # Google Test
 #********************************************************
 ADD_SUBDIRECTORY(googletest/)
-INCLUDE_DIRECTORIES(googletest/googletest/include)
-INCLUDE_DIRECTORIES(googletest/googletest/)
 
 #********************************************************
 # Stringozzi Tests
@@ -56,7 +55,7 @@ ADD_TEST(stringozzi.test stringozzi.test)
 #********************************************************
 # Perform Stringozzi tests and generate Coverage
 #********************************************************
-ADD_CUSTOM_TARGET(stringozzi.coverage ALL opencppcoverage --source stringozzi\\src   -- ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/stringozzi.test${CMAKE_EXECUTABLE_SUFFIX}
+ADD_CUSTOM_TARGET(stringozzi.test.exec ALL ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/stringozzi.test${CMAKE_EXECUTABLE_SUFFIX}
                   DEPENDS stringozzi.test 
                   COMMENT "Run tests and generate coverage boards"
 )
@@ -65,7 +64,7 @@ ADD_CUSTOM_TARGET(stringozzi.coverage ALL opencppcoverage --source stringozzi\\s
 # Generate Documentation
 #********************************************************
 ADD_CUSTOM_TARGET(stringozzi.doc ALL doxygen docs/Doxyfile
-                  DEPENDS stringozzi.test 
-				  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+                  DEPENDS stringozzi.test.exec
+		  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
                   COMMENT "Generate Documentation"
 )
