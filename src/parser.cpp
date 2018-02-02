@@ -34,16 +34,16 @@ namespace Stringozzi
 	namespace Rules
 	{
 		/*********************************************************************************/
-		//bool RulesSet::Check(Char** _Stream) const 
+		//bool RulesSet::Check(const Char** _Stream) const 
 		//{
 		//	return tok.Check(_Stream);
 		//}
 		
 		namespace Manipulators
 		{
-			bool Not::Check(Char** _Stream)const 
+			bool Not::Check(const Char** _Stream)const 
 			{
-				Char* _Start = *_Stream;
+				const Char* _Start = *_Stream;
 				if (!_Tokenizer.Check(&_Start))
 				{
 					(*_Stream)++;
@@ -52,9 +52,9 @@ namespace Stringozzi
 				return false;
 			}
 
-			bool Or::Check(Char** _Stream)const 
+			bool Or::Check(const Char** _Stream)const 
 			{
-				Char* _Start = *_Stream;
+				const Char* _Start = *_Stream;
 				if (!_TokenizerA->Check(&_Start))
 				{
 					if (!_TokenizerB->Check(&_Start))
@@ -66,9 +66,9 @@ namespace Stringozzi
 				return true;
 			}
 
-			bool And::Check(Char** _Stream)const 
+			bool And::Check(const Char** _Stream)const 
 			{
-				Char *_Start1,*_Start2;
+				const Char *_Start1,*_Start2;
 
 				_Start1 = *_Stream;
 				if (!_TokenizerA->Check(&_Start1))
@@ -84,10 +84,10 @@ namespace Stringozzi
 				return true;
 			}
 
-			bool Sequence::Check(Char** _Stream)const 
+			bool Sequence::Check(const Char** _Stream)const 
 			{
 			
-				Char* _Start = *_Stream;
+				const Char* _Start = *_Stream;
 
 				if (!_TokenizerA.Check(&_Start))
 					return false;
@@ -100,9 +100,9 @@ namespace Stringozzi
 
 			}
 
-			bool Within::Check(Char** _Stream)const 
+			bool Within::Check(const Char** _Stream)const 
 			{
-				Char* _Start = *_Stream;
+				const Char* _Start = *_Stream;
 				unsigned long i = 0;
 				for (; i < max; i++)
 				{
@@ -119,34 +119,34 @@ namespace Stringozzi
 				return false;
 			}
 
-			bool Times::Check(Char** _Stream)const 
+			bool Times::Check(const Char** _Stream)const 
 			{
 				return Within(max, max, _Tokenizer).Check(_Stream);
 			}
 
-			bool OneOrMore::Check(Char** _Stream)const 
+			bool OneOrMore::Check(const Char** _Stream)const 
 			{
 				return Within(1, -1, _Tokenizer).Check(_Stream);
 			}
 
-			bool ZeroOrOne::Check(Char** _Stream)const 
+			bool ZeroOrOne::Check(const Char** _Stream)const 
 			{
 				return Within(0, 1, _Tokenizer).Check(_Stream);
 			}
 
-			bool While::Check(Char** _Stream)const 
+			bool While::Check(const Char** _Stream)const 
 			{
 				return Within(0, -1, _Tokenizer).Check(_Stream);
 			}
 
-			bool Until::Check(Char** _Stream)const 
+			bool Until::Check(const Char** _Stream)const 
 			{
 				return (While(Not(_Tokenizer))).Check(_Stream);
 			}
 
-			bool Extract::Check(Char** _Stream)const 
+			bool Extract::Check(const Char** _Stream)const 
 			{
-				Char* _Start = *_Stream;
+				const Char* _Start = *_Stream;
 				bool _Result = _Tokenizer.Check(&_Start);
 				*_Input = 0;
 				STRCAT(_Input,*_Stream,(_Start - *_Stream));
@@ -154,9 +154,9 @@ namespace Stringozzi
 				return _Result;
 			}
 
-			bool ReturnToCallback::Check(Char** _Stream)const 
+			bool ReturnToCallback::Check(const Char** _Stream)const 
 			{
-				Char* _Start = *_Stream;
+				const Char* _Start = *_Stream;
 				STDSTRING _Output;
 				bool _Result = _Tokenizer.Check(&_Start);
 				_Output.assign(*_Stream,_Start);
@@ -165,7 +165,7 @@ namespace Stringozzi
 				return _Result;
 			}
 
-			bool Enclosed::Check(Char** _Stream)const 
+			bool Enclosed::Check(const Char** _Stream)const 
 			{
 				return (Filters::Exact(open) + _Tokenizer + Filters::Exact(close)).Check(_Stream);
 			}
@@ -175,13 +175,13 @@ namespace Stringozzi
 
 		namespace Filters
 		{
-			bool Any::Check(Char** _Stream)const 
+			bool Any::Check(const Char** _Stream)const 
 			{
 				(*_Stream)++;
 				return true;
 			}
 
-			bool In::Check(Char** _Stream)const 
+			bool In::Check(const Char** _Stream)const 
 			{
 				if (!_Input || !*_Input )
 					return false;
@@ -197,7 +197,7 @@ namespace Stringozzi
 				return false;
 			}
 
-			bool Between::Check(Char** _Stream)const 
+			bool Between::Check(const Char** _Stream)const 
 			{
 				if (**_Stream >= _Lower && **_Stream <= _Upper)
 				{
@@ -208,33 +208,33 @@ namespace Stringozzi
 			}
 
 
-			bool Alphabet::Check(Char** _Stream)const 
+			bool Alphabet::Check(const Char** _Stream)const 
 			{
 				return (Between(_C('a'), _C('z')).Check(_Stream) | Between(_C('A'), _C('Z')).Check(_Stream));
 			}
 
 
-			bool Digit::Check(Char** _Stream)const 
+			bool Digit::Check(const Char** _Stream)const 
 			{
 				return Between(_C('0'), _C('9')).Check(_Stream);
 			}
 
 
-			bool Hex::Check(Char** _Stream)const 
+			bool Hex::Check(const Char** _Stream)const 
 			{
 				return (Between(_C('0'), _C('9')) 
 					| Between(_C('a'), _C('f')) 
 					| Between(_C('A'), _C('F'))).Check(_Stream);
 			}
 
-			bool AlphaNumeric::Check(Char** _Stream)const 
+			bool AlphaNumeric::Check(const Char** _Stream)const 
 			{
 				return (ALPHABET.Check(_Stream) | DIGIT.Check(_Stream));
 			}
 
-			bool Exact::Check(Char** _Stream)const 
+			bool Exact::Check(const Char** _Stream)const 
 			{
-				Char* _StreamCursor = *_Stream;
+				const Char* _StreamCursor = *_Stream;
 				const Char* _InputCursor = _Input;
 				if (!*_InputCursor)
 					return false;
@@ -252,10 +252,10 @@ namespace Stringozzi
 			}
 
 
-			bool Like::Check(Char** _Stream)const 
+			bool Like::Check(const Char** _Stream)const 
 			{
-				Char* _StreamCursor = *_Stream;
-				Char* _InputCursor = _Input;
+				const Char* _StreamCursor = *_Stream;
+				const Char* _InputCursor = _Input;
 				while (*_InputCursor)
 				{
 					if (tolower(*_StreamCursor) != tolower(*_InputCursor))
@@ -268,12 +268,12 @@ namespace Stringozzi
 
 			}
 
-			bool WhiteSpace::Check(Char** _Stream)const 
+			bool WhiteSpace::Check(const Char** _Stream)const 
 			{
 				return In(_C(" \t\n\r")).Check(_Stream);
 			}
 
-			bool Is::Check(Char** _Stream)const 
+			bool Is::Check(const Char** _Stream)const 
 			{
 				if (**_Stream == _Letter)
 				{
@@ -283,33 +283,33 @@ namespace Stringozzi
 				return false;
 			}
 
-			bool Decimal::Check(Char** _Stream)const 
+			bool Decimal::Check(const Char** _Stream)const 
 			{
 				return OneOrMore(DIGIT).Check(_Stream);
 			}
 
-			bool Word::Check(Char** _Stream)const 
+			bool Word::Check(const Char** _Stream)const 
 			{
 				return OneOrMore(ALPHABET).Check(_Stream);
 			}
 
-			bool EndOfText::Check(Char** _Stream)const 
+			bool EndOfText::Check(const Char** _Stream)const 
 			{
 				return (**_Stream == _C('\0'));
 			}
 
 
-			bool EndOfLine::Check(Char** _Stream)const 
+			bool EndOfLine::Check(const Char** _Stream)const 
 			{
 				return Exact(_C("\r\n")).Check(_Stream);
 			}
 
-			bool Integer::Check(Char** _Stream)const 
+			bool Integer::Check(const Char** _Stream)const 
 			{
-				Char* _Temp = *_Stream;
+				const Char* _Temp = *_Stream;
 				if (!*_Temp)
 					return false;
-				int _Result = STRTOL(_Temp, &_Temp, 10);
+				int _Result = STRTOL(_Temp, (Char**) &_Temp, 10);
 				if (_Temp == *_Stream)
 					return false;
 				if (_Result >= _Min && _Result <= _Max)
@@ -320,12 +320,12 @@ namespace Stringozzi
 				return false;
 			}
 
-			bool Float::Check(Char** _Stream)const 
+			bool Float::Check(const Char** _Stream)const 
 			{
-				Char* temp = *_Stream;
+				const Char* temp = *_Stream;
 				if (!*temp) 
 					return false;
-				float ret = STRTOF(temp, &temp);
+				float ret = STRTOF(temp, (Char**) &temp);
 				if (temp == *_Stream)	
 					return false;
 				if (ret >= _Min && ret <= _Max)
@@ -341,14 +341,14 @@ namespace Stringozzi
 		namespace Utils
 		{
 
-			bool IPv4::Check(Char** _Stream)const 
+			bool IPv4::Check(const Char** _Stream)const 
 			{
 				return (3 * ((Within(1,3,DIGIT) & Integer(255)) + Is(_C('.'))) + (Within(1,3,DIGIT) 
 						& Filters::Integer(255))).Check(_Stream);
 			}
 			/*********************************************************************************/
 
-			bool Host::Check(Char** _Stream)const 
+			bool Host::Check(const Char** _Stream)const 
 			{
 				return ( IPV4 | (OneOrMore(ALPHANUMERIC) + ZeroOrMore(Is(_C('-')) + OneOrMore(ALPHANUMERIC))
 					+ ZeroOrMore( Is(_C('.')) + OneOrMore(ALPHANUMERIC) + ZeroOrMore(Is(_C('-')) 
@@ -356,14 +356,14 @@ namespace Stringozzi
 			}
 			/*********************************************************************************/
 
-			bool Email::Check(Char** _Stream)const 
+			bool Email::Check(const Char** _Stream)const 
 			{
 				return (OneOrMore(ALPHANUMERIC | In(_C("!#$%&'*+/=?^_`{|}~-"))) + ZeroOrMore(Is('.') + (ALPHANUMERIC
 					| In(_C("!#$%&'*+/=?^_`{|}~-")))) + Is('@') + HOST).Check(_Stream);
 			}
 			/*********************************************************************************/
 
-			bool Phone::Check(Char** _Stream)const 
+			bool Phone::Check(const Char** _Stream)const 
 			{
 				return (ZeroOrMore(Is(_C('+'))) + (ZeroOrMore(Is(_C('(')) + OneOrMore(DIGIT) + Is(_C(')')))
 					+ ZeroOrMore(WHITESPACE)) + OneOrMore(DIGIT) + ZeroOrMore(In(_C(" -"))
@@ -372,12 +372,12 @@ namespace Stringozzi
 
 			/*********************************************************************************/
 
-			bool ServerAddress::Check(Char** _Stream)const 
+			bool ServerAddress::Check(const Char** _Stream)const 
 			{
 				return (HOST + ZeroOrOne(Is(_C(':')) + Integer(1, 65535))).Check(_Stream);
 			}
 			/*********************************************************************************/
-			bool Uri::Check(Char** _Stream)const 
+			bool Uri::Check(const Char** _Stream)const 
 			{
 				return (OneOrMore(ALPHANUMERIC) + Is(_C(':')) + (OneOrMore(ALPHANUMERIC | In(_C("!#$%&'*+/=?^_`{|}~-"))) 
 					+ ZeroOrMore(Is('.') + (ALPHANUMERIC | In(_C("!#$%&'*+/=?^_`{|}~-"))))) + Is(_C('@'))
@@ -391,7 +391,7 @@ namespace Stringozzi
 
 	/*********************************************************************************/
 
-	StringProcessor::StringProcessor(Char* str)	
+	StringProcessor::StringProcessor(const Char* str)	
 	{
 		string=str;
 		cursor=str;
@@ -401,7 +401,7 @@ namespace Stringozzi
 
 	bool StringProcessor::Parse(const Rules::TokenizerInterface& tok )
 	{
-		Char* _Start = cursor;
+		const Char* _Start = cursor;
 		bool _Result = tok.Check(&cursor);
 		if(_Result)	lasttokenized.assign(_Start, cursor);
 		return  _Result	;
@@ -412,12 +412,12 @@ namespace Stringozzi
 		return (tok + EndOfText()).Check(&cursor);
 	}
 
-	Char* StringProcessor::Search(const Rules::TokenizerInterface& tok)
+	const Char* StringProcessor::Search(const Rules::TokenizerInterface& tok)
 	{
 		bool _Result = (Until(EOT | tok)).Check(&cursor);
 		if (_Result && *cursor!=0)
 		{
-			Char* _Start = cursor;
+			const Char* _Start = cursor;
 			(tok).Check(&cursor);
 			return _Start;
 		}

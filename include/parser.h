@@ -81,7 +81,7 @@ namespace Stringozzi
 		{
 		public:
 			/*!
-			* @fn 	bool Check(Char**)
+			* @fn 	bool Check(const Char** )
 			* Check if the string pointed by cursor is complying to this parsing rule
 			* @param[in/out] cursor  A cursor to the parsing string, after successful parsing,
 			* 						 the cursor value should move to the last character as far as
@@ -90,7 +90,7 @@ namespace Stringozzi
 			* 						 Otherwise it returns false
 			*
 			*/
-			virtual bool Check(Char** cursor) const = 0;
+			virtual bool Check(const Char** cursor) const = 0;
 
 		};
 
@@ -114,7 +114,7 @@ namespace Stringozzi
 		//	* @param[in] tok  contained parsing rule element
 		//	*/
 		//	 RulesSet(const TokenizerInterface& tok) : tok(tok) {}
-		//	virtual bool Check(Char**) const ;
+		//	virtual bool Check(const Char** ) const ;
 
 
 		//};
@@ -157,7 +157,7 @@ namespace Stringozzi
 				* @param[in] tok  contained parsing rule element
 				*/
 				Not(const TokenizerInterface& tok) : _Tokenizer(tok) {}
-				virtual bool Check(Char** cursor)const ;
+				virtual bool Check(const Char** cursor)const ;
 
 			};
 
@@ -204,7 +204,7 @@ namespace Stringozzi
 					_TokenizerA = &tok1;
 					_TokenizerB = &tok2;
 				}
-				virtual bool Check(Char**)const ;
+				virtual bool Check(const Char** )const ;
 
 			};
 
@@ -250,7 +250,7 @@ namespace Stringozzi
 					_TokenizerB = &tok2;
 				}
 
-				virtual bool Check(Char**)const ;
+				virtual bool Check(const Char** )const ;
 
 			};
 			/*!
@@ -284,7 +284,7 @@ namespace Stringozzi
 				* @param[in] tok2  the next contained parsing rule element
 				*/
 				Sequence(const TokenizerInterface& tok1, const TokenizerInterface& tok2) :_TokenizerA(tok1), _TokenizerB(tok2) {}
-				virtual bool Check(Char**)const ;
+				virtual bool Check(const Char** )const ;
 
 			};
 
@@ -327,7 +327,7 @@ namespace Stringozzi
 				* @param[in] tok  the next contained parsing rule element
 				*/
 				Within(unsigned long max,const  TokenizerInterface& tok) : min(0), max(max), _Tokenizer(tok) {}
-				virtual bool Check(Char**)const ;
+				virtual bool Check(const Char** )const ;
 
 			};
 
@@ -362,7 +362,7 @@ namespace Stringozzi
 				* @param[in] tok  the next contained parsing rule element
 				*/
 				Times(int max, const TokenizerInterface& tok) : max(max), _Tokenizer(tok) {}
-				virtual bool Check(Char**)const ;
+				virtual bool Check(const Char** )const ;
 
 			};
 
@@ -394,7 +394,7 @@ namespace Stringozzi
 				* @param[in] tok  the contained parsing rule element
 				*/
 				 OneOrMore(const TokenizerInterface& tok) : _Tokenizer(tok) {}
-				virtual bool Check(Char**)const ;
+				virtual bool Check(const Char** )const ;
 
 			};
 
@@ -423,7 +423,7 @@ namespace Stringozzi
 				* @param[in] tok  the contained parsing rule element
 				*/
 				 ZeroOrOne(const TokenizerInterface& tok) : _Tokenizer(tok) {}
-				virtual bool Check(Char**)const ;
+				virtual bool Check(const Char** )const ;
 
 			};
 
@@ -463,7 +463,7 @@ namespace Stringozzi
 				const TokenizerInterface& _Tokenizer;
 			public:
 				 While(const TokenizerInterface& tok) : _Tokenizer(tok) {}
-				virtual bool Check(Char**)const ;
+				virtual bool Check(const Char** )const ;
 
 			};
 	
@@ -491,7 +491,7 @@ namespace Stringozzi
 				* @param[in] tok  the contained parsing rule element
 				*/
 				Until(const TokenizerInterface& tok) : _Tokenizer(tok) {}
-				virtual bool Check(Char**)const ;
+				virtual bool Check(const Char** )const ;
 
 			};
 
@@ -520,7 +520,7 @@ namespace Stringozzi
 				* @param[in] tok  the contained parsing rule element
 				*/
 				Extract(Char* str, const TokenizerInterface& tok) : _Input(str), _Tokenizer(tok) {}
-				virtual bool Check(Char**)const ;
+				virtual bool Check(const Char** )const ;
 
 			};
 
@@ -555,7 +555,7 @@ namespace Stringozzi
 				* @param[in] _Tokenizer  the contained parsing rule element
 				*/
 				ReturnToCallback(CallBack cb, const TokenizerInterface& tok) : cb(cb), _Tokenizer(tok) {}
-				virtual bool Check(Char**)const ;
+				virtual bool Check(const Char** )const ;
 
 			};
 
@@ -587,7 +587,7 @@ namespace Stringozzi
 				* @param[in] tok  the contained parsing rule element
 				*/
 				Enclosed(Char* open, Char* close, const TokenizerInterface& tok) :_Tokenizer(tok), open(open), close(close) {}
-				virtual bool Check(Char**)const ;
+				virtual bool Check(const Char** )const ;
 
 			};
 
@@ -612,7 +612,7 @@ namespace Stringozzi
 			{
 			public:
 				Any() {}
-				virtual bool Check(Char**)const ;
+				virtual bool Check(const Char** )const ;
 
 			};
 
@@ -635,7 +635,7 @@ namespace Stringozzi
 				Char* _Input;
 			public:
 				 In(Char* str) : _Input(str) {}
-				virtual bool Check(Char**)const ;
+				virtual bool Check(const Char** )const ;
 			};
 
 			/*!
@@ -656,7 +656,7 @@ namespace Stringozzi
 				Char _Lower, _Upper;
 			public:
 				Between(Char a, Char b) : _Lower(a), _Upper(b) {}
-				virtual bool Check(Char**)const ;
+				virtual bool Check(const Char** )const ;
 
 			};
 			//TODO:class SmallLetter;
@@ -679,7 +679,7 @@ namespace Stringozzi
 
 			public:
 				Alphabet() {}
-				virtual bool Check(Char**)const ;
+				virtual bool Check(const Char** )const ;
 
 			};
 			
@@ -702,7 +702,7 @@ namespace Stringozzi
 
 			public:
 				Digit() {}
-				virtual bool Check(Char**)const ;
+				virtual bool Check(const Char** )const ;
 
 			};
 			
@@ -723,7 +723,7 @@ namespace Stringozzi
 
 			public:
 				Hex() {}
-				virtual bool Check(Char**)const ;
+				virtual bool Check(const Char** )const ;
 
 			};
 			
@@ -743,7 +743,7 @@ namespace Stringozzi
 			{
 			public:
 				AlphaNumeric() {}
-				virtual bool Check(Char**)const ;
+				virtual bool Check(const Char** )const ;
 
 			};
 			
@@ -767,7 +767,7 @@ namespace Stringozzi
 				const Char *  _Input;
 			public:
 				Exact(const Char * str) : _Input(str) {}
-				virtual bool Check(Char**)const ;
+				virtual bool Check(const Char** )const ;
 
 			};
 
@@ -787,7 +787,7 @@ namespace Stringozzi
 				Char* _Input;
 			public:
 				 Like(Char* str) : _Input(str) {}
-				virtual bool Check(Char**)const ;
+				virtual bool Check(const Char** )const ;
 
 			};
 			/*!
@@ -805,7 +805,7 @@ namespace Stringozzi
 			{
 			public:
 				WhiteSpace() {}
-				virtual bool Check(Char**)const ;
+				virtual bool Check(const Char** )const ;
 
 			};
 			extern LIB_REFERENCE WhiteSpace WHITESPACE;
@@ -827,7 +827,7 @@ namespace Stringozzi
 			public:
 				 Is(const Char c) :_Letter(c) {}
 				// Is(const Char* s) :letter(s[0]) {}
-				virtual bool Check(Char**)const ;
+				virtual bool Check(const Char** )const ;
 
 			};
 
@@ -849,7 +849,7 @@ namespace Stringozzi
 
 			public:
 				Decimal() {}
-				virtual bool Check(Char**)const ;
+				virtual bool Check(const Char** )const ;
 
 			};
 			extern LIB_REFERENCE Decimal 	DECIMAL;
@@ -871,7 +871,7 @@ namespace Stringozzi
 
 			public:
 				Word() {}
-				virtual bool Check(Char**)const ;
+				virtual bool Check(const Char** )const ;
 
 			};
 			extern LIB_REFERENCE  Word	WORD;
@@ -892,7 +892,7 @@ namespace Stringozzi
 			{
 			public:
 				EndOfText() {}
-				virtual bool Check(Char**)const ;
+				virtual bool Check(const Char** )const ;
 
 			};
 			extern LIB_REFERENCE EndOfText EOT;
@@ -910,7 +910,7 @@ namespace Stringozzi
 			{
 			public:
 				EndOfLine() {}
-				virtual bool Check(Char**)const ;
+				virtual bool Check(const Char** )const ;
 
 			};
 			extern LIB_REFERENCE EndOfLine EOL;
@@ -935,7 +935,7 @@ namespace Stringozzi
 				Integer(int min, int max) :_Min(min), _Max(max) {}
 				 Integer(int max) :_Min(0), _Max(max) {}
 				Integer() :_Min(0), _Max(0x7fffffff) {}
-				virtual bool Check(Char**)const ;
+				virtual bool Check(const Char** )const ;
 
 			};
 
@@ -958,7 +958,7 @@ namespace Stringozzi
 				Float(float min, float max) :_Min(min), _Max(max) {}
 				 Float(float max) :_Min(0.0f), _Max(max) {}
 				Float() : _Min(0.0f), _Max(3.402823e+38f) {}
-				virtual bool Check(Char**)const ;
+				virtual bool Check(const Char** )const ;
 
 			};
 			//namespace Date
@@ -992,7 +992,7 @@ namespace Stringozzi
 			class LIB_REFERENCE IPv4 : public TokenizerInterface
 			{
 			public:
-				virtual bool Check(Char**)const ;
+				virtual bool Check(const Char** )const ;
 
 			};
 			extern LIB_REFERENCE IPv4 IPV4;
@@ -1006,7 +1006,7 @@ namespace Stringozzi
 			class LIB_REFERENCE Host : public TokenizerInterface
 			{
 			public:
-				virtual bool Check(Char**)const ;
+				virtual bool Check(const Char** )const ;
 
 			};
 			
@@ -1020,7 +1020,7 @@ namespace Stringozzi
 			*/
 			class LIB_REFERENCE Email : public TokenizerInterface
 			{
-			public:	virtual bool Check(Char**)const ;
+			public:	virtual bool Check(const Char** )const ;
 			};
 			extern LIB_REFERENCE Email EMAIL;
 
@@ -1032,7 +1032,7 @@ namespace Stringozzi
 			*/
 			class LIB_REFERENCE Phone : public TokenizerInterface
 			{
-			public:	virtual bool Check(Char**)const ;
+			public:	virtual bool Check(const Char** )const ;
 			};
 			extern LIB_REFERENCE Phone PHONE;
 
@@ -1044,7 +1044,7 @@ namespace Stringozzi
 			*/
 			class LIB_REFERENCE ServerAddress : public TokenizerInterface
 			{
-			public:	virtual bool Check(Char**)const ;
+			public:	virtual bool Check(const Char** )const ;
 			};
 			extern LIB_REFERENCE  ServerAddress SERVERADDRESS;
 
@@ -1056,7 +1056,7 @@ namespace Stringozzi
 			*/
 			class LIB_REFERENCE Uri : public TokenizerInterface
 			{
-			public:	virtual bool Check(Char**)const ;
+			public:	virtual bool Check(const Char** )const ;
 			};
 			extern LIB_REFERENCE Uri URI;
 
@@ -1067,16 +1067,16 @@ namespace Stringozzi
 	class LIB_REFERENCE StringProcessor
 	{
 	private:
-		Char* string;
-		Char* cursor;
+		const Char* string;
+		const Char* cursor;
 		std::string lasttokenized;
-		std::stack<Char*> savedpositions;
+		std::stack<const Char*> savedpositions;
 
 	public:
-		StringProcessor(Char* str); 
+		StringProcessor(const Char* str); 
 		bool Parse(const Rules::TokenizerInterface& tok);
 		bool Validate(const Rules::TokenizerInterface& tok);
-		Char* Search(const Rules::TokenizerInterface& tok);
+		const Char* Search(const Rules::TokenizerInterface& tok);
 		int GetLastParserPosition();
 		void Push();
 		void Pop();
