@@ -125,13 +125,13 @@ namespace Stringozzi
 			{
 				const Char* _Start = *_Stream;
 				unsigned long i = 0;
-				for (; i < max; i++)
+				for (; i < _Max; i++)
 				{
 					if (!_Tokenizer.Check(&_Start))
 						break;
 				}
 
-				if (i >= min && i <= max)
+				if (i >= _Min && i <= _Max)
 				{
 					*_Stream = _Start;
 					return true;
@@ -142,7 +142,7 @@ namespace Stringozzi
 
 			bool Times::Check(const Char** _Stream)const 
 			{
-				return Within(max, max, _Tokenizer).Check(_Stream);
+				return Within(_Max, _Max, _Tokenizer).Check(_Stream);
 			}
 
 			bool OneOrMore::Check(const Char** _Stream)const 
@@ -198,6 +198,9 @@ namespace Stringozzi
 		{
 			bool Any::Check(const Char** _Stream)const 
 			{
+				if (!*_Stream)
+					return false;
+
 				(*_Stream)++;
 				return true;
 			}
@@ -243,14 +246,13 @@ namespace Stringozzi
 
 			bool Hex::Check(const Char** _Stream)const 
 			{
-				return (Between(_C('0'), _C('9')) 
-					| Between(_C('a'), _C('f')) 
+				return (DIGIT | Between(_C('a'), _C('f')) 
 					| Between(_C('A'), _C('F'))).Check(_Stream);
 			}
 
 			bool AlphaNumeric::Check(const Char** _Stream)const 
 			{
-				return (ALPHABET.Check(_Stream) | DIGIT.Check(_Stream));
+				return (ALPHABET | DIGIT).Check(_Stream);
 			}
 
 			bool Exact::Check(const Char** _Stream)const 
@@ -414,32 +416,32 @@ namespace Stringozzi
 
 	StringProcessor::StringProcessor(const Char* str)	
 	{
-		string=str;
-		cursor=str;
-		lasttokenized.resize(512);
-		lasttokenized.clear();
+		_String=str;
+		_Cursor=str;
+		_LastTokenized.resize(512);
+		_LastTokenized.clear();
 	}
 
 	bool StringProcessor::Parse(const Rules::TokenizerInterface& tok )
 	{
-		const Char* _Start = cursor;
-		bool _Result = tok.Check(&cursor);
-		if(_Result)	lasttokenized.assign(_Start, cursor);
+		const Char* _Start = _Cursor;
+		bool _Result = tok.Check(&_Cursor);
+		if(_Result)	_LastTokenized.assign(_Start, _Cursor);
 		return  _Result	;
 	}
 
 	bool StringProcessor::Validate(const Rules::TokenizerInterface& tok)
 	{
-		return (tok + EndOfText()).Check(&cursor);
+		return (tok + EndOfText()).Check(&_Cursor);
 	}
 
 	const Char* StringProcessor::Search(const Rules::TokenizerInterface& tok)
 	{
-		bool _Result = (Until(EOT | tok)).Check(&cursor);
-		if (_Result && *cursor!=0)
+		bool _Result = (Until(EOT | tok)).Check(&_Cursor);
+		if (_Result && *_Cursor!=0)
 		{
-			const Char* _Start = cursor;
-			(tok).Check(&cursor);
+			const Char* _Start = _Cursor;
+			(tok).Check(&_Cursor);
 			return _Start;
 		}
 		return 0;
@@ -448,32 +450,32 @@ namespace Stringozzi
 
 	int StringProcessor::GetLastParserPosition()
 	{
-		return ((int)(cursor - string));
+		return ((int)(_Cursor - _String));
 	}
 	
 	void StringProcessor::Push()
 	{
-		savedpositions.push(cursor);
+		_SavedPositions.push(_Cursor);
 	}
 
 	void StringProcessor::Pop()
 	{
-		if (!savedpositions.empty())
+		if (!_SavedPositions.empty())
 		{
-			cursor = savedpositions.top();
-			savedpositions.pop();
+			_Cursor = _SavedPositions.top();
+			_SavedPositions.pop();
 		}
 	}
 
 	bool StringProcessor::IsEOT()
 	{
-		return ((*cursor) == _C('\0'));
+		return ((*_Cursor) == _C('\0'));
 	}
 
 	void StringProcessor::Reset()
 	{
-		lasttokenized.clear();
-		cursor = string;
+		_LastTokenized.clear();
+		_Cursor = _String;
 	}
 
 }

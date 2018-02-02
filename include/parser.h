@@ -303,8 +303,8 @@ namespace Stringozzi
 			class LIB_REFERENCE Within : public TokenizerInterface
 			{
 			private:
-				unsigned long  min;
-				unsigned long max;
+				unsigned long _Min;
+				unsigned long _Max;
 				const TokenizerInterface& _Tokenizer;
 			public:
 				/*!
@@ -314,14 +314,14 @@ namespace Stringozzi
 				* @param[in] max  Maximum number of repitition
 				* @param[in] tok  the next contained parsing rule element
 				*/
-				Within(unsigned long min, unsigned long max, const TokenizerInterface& tok) : min(min), max(max), _Tokenizer(tok) {}
+				Within(unsigned long min, unsigned long max, const TokenizerInterface& tok) : _Min(min), _Max(max), _Tokenizer(tok) {}
 				/*!
 				* @fn 	Within( unsigned long max, TokenizerInterface& tok)
 				* Constructor to Sequence class
 				* @param[in] max  Maximum number of repitition
 				* @param[in] tok  the next contained parsing rule element
 				*/
-				Within(unsigned long max,const  TokenizerInterface& tok) : min(0), max(max), _Tokenizer(tok) {}
+				Within(unsigned long max,const  TokenizerInterface& tok) : _Min(0), _Max(max), _Tokenizer(tok) {}
 				virtual bool Check(const Char** )const ;
 
 			};
@@ -347,16 +347,16 @@ namespace Stringozzi
 			class LIB_REFERENCE Times : public TokenizerInterface
 			{
 			private:
-				int  max;
+				int  _Max;
 				const TokenizerInterface& _Tokenizer;
 			public:
 				/*!
 				* @fn 	Times( int max, TokenizerInterface& tok)
 				* Constructor to Sequence class
-				* @param[in] max  number of repitition
+				* @param[in] _Max  number of repitition
 				* @param[in] tok  the next contained parsing rule element
 				*/
-				Times(int max, const TokenizerInterface& tok) : max(max), _Tokenizer(tok) {}
+				Times(int max, const TokenizerInterface& tok) : _Max(max), _Tokenizer(tok) {}
 				virtual bool Check(const Char** )const ;
 
 			};
@@ -1062,10 +1062,10 @@ namespace Stringozzi
 	class LIB_REFERENCE StringProcessor
 	{
 	private:
-		const Char* string;
-		const Char* cursor;
-		std::string lasttokenized;
-		std::stack<const Char*> savedpositions;
+		const Char* _String;
+		const Char* _Cursor;
+		std::string _LastTokenized;
+		std::stack<const Char*> _SavedPositions;
 
 	public:
 		StringProcessor(const Char* str); 
