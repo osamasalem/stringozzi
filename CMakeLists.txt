@@ -7,9 +7,9 @@ PROJECT(stringozzi CXX)
 #********************************************************
 # Perform Stringozzi static check
 #********************************************************
-#ADD_CUSTOM_TARGET(stringozzi.check ALL cppcheck  --enable=all ../src/parser.cpp ../include/parser.h ../test/parser.test.cpp
-#                  COMMENT "Static check of C++ Check"
-#)
+ADD_CUSTOM_TARGET(stringozzi.check ALL cppcheck  --verbose --enable=all ../src/parser.cpp ../include/parser.h ../test/parser.test.cpp
+                  COMMENT "Static check of C++ Check"
+)
 
 #********************************************************
 # Compiler Configuration

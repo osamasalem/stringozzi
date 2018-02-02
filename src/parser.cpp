@@ -55,9 +55,9 @@ namespace Stringozzi
 			bool Or::Check(const Char** _Stream)const 
 			{
 				const Char* _Start = *_Stream;
-				if (!_TokenizerA->Check(&_Start))
+				if (!_TokenizerA.Check(&_Start))
 				{
-					if (!_TokenizerB->Check(&_Start))
+					if (!_TokenizerB.Check(&_Start))
 					{
 						return false;
 					}
@@ -71,11 +71,11 @@ namespace Stringozzi
 				const Char *_Start1,*_Start2;
 
 				_Start1 = *_Stream;
-				if (!_TokenizerA->Check(&_Start1))
+				if (!_TokenizerA.Check(&_Start1))
 					return false;
 
 				_Start2 = *_Stream;
-				if (!_TokenizerB->Check(&_Start2))
+				if (!_TokenizerB.Check(&_Start2))
 					return false;
 
 				_Start1 = ((_Start2 < _Start1) ? _Start2 : _Start1);
@@ -301,7 +301,7 @@ namespace Stringozzi
 
 			bool EndOfLine::Check(const Char** _Stream)const 
 			{
-				return Exact(_C("\r\n")).Check(_Stream);
+				return Exact(END_OF_LINE).Check(_Stream);
 			}
 
 			bool Integer::Check(const Char** _Stream)const 

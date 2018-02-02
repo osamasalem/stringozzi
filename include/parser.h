@@ -49,13 +49,15 @@ typedef char Char;
 #endif
 
 #if defined _MSC_VER
+#define END_OF_LINE	_C("\r\n")
 #pragma warning( disable : 4251 ) 
 #ifdef DLLEXPORT
 #define LIB_REFERENCE __declspec(dllexport)
 #else
 #define LIB_REFERENCE __declspec(dllimport)
 #endif
-#else
+#elif defined __GNUC__
+#define END_OF_LINE	_C("\n")
 #define LIB_REFERENCE
 #endif
 
@@ -189,8 +191,8 @@ namespace Stringozzi
 			class LIB_REFERENCE  Or : public TokenizerInterface
 			{
 			private:
-				const TokenizerInterface* _TokenizerA;
-				const TokenizerInterface* _TokenizerB;
+				const TokenizerInterface& _TokenizerA;
+				const TokenizerInterface& _TokenizerB;
 
 			public:
 				/*!
@@ -200,10 +202,8 @@ namespace Stringozzi
 				* @param[in] tok2  the second contained parsing rule element
 				*/
 				Or(const TokenizerInterface& tok1,const  TokenizerInterface& tok2)
-				{
-					_TokenizerA = &tok1;
-					_TokenizerB = &tok2;
-				}
+					:_TokenizerA (tok1)
+					,_TokenizerB (tok2)	{}
 				virtual bool Check(const Char** )const ;
 
 			};
@@ -234,8 +234,8 @@ namespace Stringozzi
 			class LIB_REFERENCE And : public TokenizerInterface
 			{
 			private:
-				const TokenizerInterface* _TokenizerA;
-				const TokenizerInterface* _TokenizerB;
+				const TokenizerInterface& _TokenizerA;
+				const TokenizerInterface& _TokenizerB;
 
 			public:
 				/*!
@@ -245,10 +245,8 @@ namespace Stringozzi
 				* @param[in] tok2  the second contained parsing rule element
 				*/
 				And(const TokenizerInterface& tok1, const TokenizerInterface& tok2)
-				{
-					_TokenizerA = &tok1;
-					_TokenizerB = &tok2;
-				}
+					:_TokenizerA(tok1)
+					, _TokenizerB(tok2) {}
 
 				virtual bool Check(const Char** )const ;
 

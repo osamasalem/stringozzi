@@ -4,5 +4,6 @@ addons:
   apt:
     packages:
       - doxygen
+      - cppcheck
 
 script: ./build.sh
