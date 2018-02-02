@@ -632,9 +632,9 @@ namespace Stringozzi
 			class LIB_REFERENCE In : public TokenizerInterface
 			{
 			private:
-				Char* _Input;
+				const Char* _Input;
 			public:
-				 In(Char* str) : _Input(str) {}
+				 In(const Char* str) : _Input(str) {}
 				virtual bool Check(Char**)const ;
 			};
 
@@ -1067,13 +1067,13 @@ namespace Stringozzi
 	class LIB_REFERENCE StringProcessor
 	{
 	private:
-		Char* string;
-		Char* cursor;
+		const Char* string;
+		const Char* cursor;
 		std::string lasttokenized;
 		std::stack<Char*> savedpositions;
 
 	public:
-		StringProcessor(Char* str); 
+		StringProcessor(const Char* str); 
 		bool Parse(const Rules::TokenizerInterface& tok);
 		bool Validate(const Rules::TokenizerInterface& tok);
 		Char* Search(const Rules::TokenizerInterface& tok);

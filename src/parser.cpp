@@ -391,7 +391,7 @@ namespace Stringozzi
 
 	/*********************************************************************************/
 
-	StringProcessor::StringProcessor(Char* str)	
+	StringProcessor::StringProcessor(const Char* str)	
 	{
 		string=str;
 		cursor=str;
