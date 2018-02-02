@@ -632,10 +632,10 @@ namespace Stringozzi
 			class LIB_REFERENCE In : public TokenizerInterface
 			{
 			private:
-				Char* _Input;
+				const Char* _Input;
 			public:
-				 In(Char* str) : _Input(str) {}
-				virtual bool Check(const Char** )const ;
+				 In(const Char* str) : _Input(str) {}
+				virtual bool Check(const Char**)const ;
 			};
 
 			/*!
