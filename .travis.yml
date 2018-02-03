@@ -7,9 +7,13 @@ addons:
     packages:
       - doxygen
       - cppcheck
-
+      
+before_script:
+    - mkdir build 
+    - cd build 
+    
 script: 
-    - mkdir build & cd build & cmake -DENABLE_COVERAGE=TRUE -Dgtest_force_shared_crt=TRUE  ..
+    - cmake -DENABLE_COVERAGE=TRUE -Dgtest_force_shared_crt=TRUE  ..
     - cmake --build .
 
 after_success:
