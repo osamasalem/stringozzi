@@ -1,42 +1,36 @@
 #********************************************************
 # General Configuration
 #********************************************************
-CMAKE_MINIMUM_REQUIRED (VERSION 2.6)
-PROJECT(stringozzi CXX)
+CMAKE_MINIMUM_REQUIRED (VERSION 3.0)
 
+PROJECT(stringozzi
+        DESCRIPTION "C++ Parsing Expression grammer library for parsing/searching/validating like Regular Expression"
+        LANGUAGES CXX)
 
 #********************************************************
 # Compiler Configuration
 #********************************************************
-
 INCLUDE_DIRECTORIES( include/ )
 
-#SET( CMAKE_RUNTIME_OUTPUT_DIRECTORY 		bin)
-#SET( CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG 	${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
-#SET( CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
-#SET( CMAKE_LIBRARY_OUTPUT_DIRECTORY lib)
-#SET( CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG lib)
-#SET( CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE lib)
 
-
-SET( CMAKE_LIBRARY_OUTPUT_DIRECTORY 	${CMAKE_BINARY_DIR}/../lib)
-SET( CMAKE_ARCHIVE_OUTPUT_DIRECTORY  	${CMAKE_BINARY_DIR}/../lib)
-SET( CMAKE_RUNTIME_OUTPUT_DIRECTORY 	${CMAKE_BINARY_DIR}/../bin)
-SET( CMAKE_DOCS_OUTPUT_DIRECTORY 		${CMAKE_BINARY_DIR}/../doc)
-SET( CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG 	${CMAKE_BINARY_DIR}/../lib)
-SET( CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG  	${CMAKE_BINARY_DIR}/../lib)
-SET( CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG 	${CMAKE_BINARY_DIR}/../bin)
+SET( CMAKE_LIBRARY_OUTPUT_DIRECTORY 	${CMAKE_CURRENT_LIST_DIR}/bin_${CMAKE_HOST_SYSTEM_NAME})
+SET( CMAKE_ARCHIVE_OUTPUT_DIRECTORY  	${CMAKE_CURRENT_LIST_DIR}/bin_${CMAKE_HOST_SYSTEM_NAME})
+SET( CMAKE_RUNTIME_OUTPUT_DIRECTORY 	${CMAKE_CURRENT_LIST_DIR}/bin_${CMAKE_HOST_SYSTEM_NAME})
+SET( CMAKE_DOCS_OUTPUT_DIRECTORY 		${CMAKE_CURRENT_LIST_DIR}/doc)
+SET( CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG 	${CMAKE_CURRENT_LIST_DIR}/bin_${CMAKE_HOST_SYSTEM_NAME}/debug)
+SET( CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG  	${CMAKE_CURRENT_LIST_DIR}/bin_${CMAKE_HOST_SYSTEM_NAME}/debug)
+SET( CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG 	${CMAKE_CURRENT_LIST_DIR}/bin_${CMAKE_HOST_SYSTEM_NAME}/debug)
 
 
 #********************************************************
 # Stringozzi
 #********************************************************
-ADD_LIBRARY( stringozzi						src/parser.cpp )
-ADD_LIBRARY( stringozzi-shared SHARED		src/parser.cpp )
+ADD_LIBRARY( stringozzi						src/Stringozzi.cpp )
+ADD_LIBRARY( stringozzi-shared SHARED		src/Stringozzi.cpp )
 
 ADD_SUBDIRECTORY(googletest/)
-ADD_EXECUTABLE(stringozzi.test test/parser.test.cpp)
-TARGET_LINK_LIBRARIES(stringozzi.test stringozzi-shared gtest)
+ADD_EXECUTABLE(stringozzi.test test/parser.test.cpp src/Stringozzi.cpp)
+TARGET_LINK_LIBRARIES(stringozzi.test gtest)
 ENABLE_TESTING()
 ADD_TEST(stringozzi.test stringozzi.test)
 
