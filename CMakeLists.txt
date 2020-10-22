@@ -3,6 +3,7 @@
 #********************************************************
 CMAKE_MINIMUM_REQUIRED (VERSION 3.0)
 
+
 PROJECT(stringozzi
         DESCRIPTION "C++ Parsing Expression grammer library for parsing/searching/validating like Regular Expression"
         LANGUAGES CXX)
@@ -25,14 +26,17 @@ SET( CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG 	${CMAKE_CURRENT_LIST_DIR}/bin_${CMAKE
 #********************************************************
 # Stringozzi
 #********************************************************
-ADD_LIBRARY( stringozzi						src/Stringozzi.cpp )
+ADD_LIBRARY( stringozzi-static			src/Stringozzi.cpp )
 ADD_LIBRARY( stringozzi-shared SHARED		src/Stringozzi.cpp )
 
 ADD_SUBDIRECTORY(googletest/)
-ADD_EXECUTABLE(stringozzi.test test/parser.test.cpp src/Stringozzi.cpp)
-TARGET_LINK_LIBRARIES(stringozzi.test gtest)
+
+ADD_EXECUTABLE(stringozzi.test test/Stringozzi.test.cpp )
+TARGET_LINK_LIBRARIES(stringozzi.test gtest stringozzi-shared)
+
 ENABLE_TESTING()
 ADD_TEST(stringozzi.test stringozzi.test)
+
 
 IF(STRINGOZZI_TRAVIS_BUILD)
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g ")

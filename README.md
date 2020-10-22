@@ -18,7 +18,7 @@ The idea of this project is raised for the need to a library to parse text based
 3. To be cross platform (Windows and Linux for now !!)
 4. To support wide C++ standards choices as much as possible
 
-## Why Stringozzi
+## Why Stringozzi ?
 1. Wide cross C++ standard compliance (this version is compliant to C++97 and upward)
 2. 3x-10x* faster than std::regex VS/GCC
 3. Lean and mean .. use only feature that you need to ( Validate / Search distinction and disable matching results ) 
@@ -28,12 +28,12 @@ The idea of this project is raised for the need to a library to parse text based
 7. support for long expressions and text
 8. Packed with useful built-in expressions (IPv4,URI, ServerName) 
 
-## Why not Stringozzi
+## Why _not_ ?
 1. You don't like pasta or Italian couisine 
 2. The expressions you use are too short
 3. The program loads validation expressions from remote source(like DB or text files)
   
- ## Example for What you can Do
+ ## The magic you can do
  Expression like that
 
   ```
@@ -80,7 +80,7 @@ int main(int argc, char** argv)
 {
   const Rule r = Is("Student No#:") > (Range(1,3) * Digit);
 
-  StringozziA(r).Test("Student No#: 434");
+  Actions::Test(r, "Student No#: 434");
 }
 ```
 ### Rules and Operators
@@ -90,14 +90,18 @@ int main(int argc, char** argv)
 | Any | Any Character |
 | Digit | Any Character between '0' and '9'|
 | Alphabet | Any Character between 'A' and 'Z'|
+| Alphanumeric | ```Digit``` or ```Alphabet```|
 | Whitespace | Any space Character |
-| _a_>_b_ | Perform parsing using rule _a_ then rule _b_ |
+| Beginning | Matches the beginning of text |
+|End | Matches the end of text (i.e. ```'\0'```)
+| _a_>_b_ | Perform parsing sequentially using rule _a_ first then rule _b_ |
 | !_a_ | Negate parsing rule _a_, this action does not move parsing pointer |
-| _a_&_b_ | Greedy and: Rule _a_ and Rule _b_, the token must comply with both rules, if they are both true it will apply the  |
+| _a_&_b_ | Greedy and: Rule _a_ and Rule _b_, the token must comply with both rules, if they are both true it will apply the most relevant one |
 | _a_\|_b_ | Rule a or Rule b, the token may comply with either rules, **short circuit applies here, so start always with most specific rule to more general ones OR use Greedy OR operator** |
-| _a_\|\|_b_ | Rule _a_ or Rule _b_, the token may comply with either rules, it always checks all rules and takes the most relevant one in expense for performance |
+| _a_\|\|_b_ | Rule _a_ or Rule _b_, the token may comply with either rules, it always checks all rules and takes the most relevant one in expense of performance |
 | *_a_ | Zero Or More  Mtahces a single instance or multiiple instances **Take care when using this rule it can match any thing**|
-|+_a_| One Or More (at least rule), Matches a single instance or multiiple instances |
+| _[num]_*_a_ | exact ```num``` of mtahces |
+|_[num]_+_a_| One Or More (optional maximum ```num```) (at least rule), Matches a single instance or multiiple instances |
 | ~_a_ | Optional token. it parses tokens whenever possible |
 | Between(_a_,_b_) | _a_ and _b_ are chars, this matches any character in the specified range|
 | In(_str_) | _str_ is string pointer,Belongs to rule: matches the chracter with a set of characters |
@@ -108,9 +112,23 @@ int main(int argc, char** argv)
 | Until(_rule_) | Skip the characters till it matches the _rule_, it requires the next token to match _rule_  |
 | LookAhead(_rule_) | it peeks the next token and checks if it matches _rule_, it does not move parsing pointer |
 | LookBack(_rule_) | it peeks the previous token and checks if it matches _rule_, it does not move parsing pointer |
+| CaseSensitive | this will set case sensitive mode in parsing process |
+| CaseSensitive | this will set case insensitive mode in parsing process |
+| SetVar(varname,_[value]_) | this will always match .. this sets a flag/variable with specified value.. if no value is supplied the default will be ```1``` |
+| DelVar(varname) | this will match always .. this is remove flag/variable  |
+| ifVar() | checks if the sored named var equals the specified value | 
+
+## Flags definition
+| Flag | Description |
+|-|-|
+| SPEG_CASEINSENSITIVE | Specify if matching process is case (in)sensitive | 	
+| SPEG_MATCHNAMED	| Match all named returns by ```Extract``` or ```>>``` operators. clearing this flag will bypass marking matches | 
+| SPEG_MATCHUNNAMED	| Store all successful matches , clearing this flag will bypass marking matches |
+| SPEG_IGNORESPACES	| Will match all successive tokens whether there are spaces between them or not, ```Whitespace``` match pattern will not work here in this mode | 
+
 
 ## Use Cases
-**- _Or_ Vs. _Greedy Or_**
+### **- _Or_ Vs. _Greedy Or_**
 Consider this example 
 ```cpp
 Rule r = (Is("V") | Is("Via")) > Is(':') ; // will not work for Via
@@ -126,7 +144,7 @@ or using Greedy OR which seek the most benefitial match in a set of OR
 Rule r = (Is("Via") || Is("V")) > Is(':') ; // Works too !!
 ```
 
-**-Recursive rules**
+### **-Recursive rules**
 Sometimes we want to use the rule inside itself to check some recursive behaviour
 
 For instance .. we want to have some sort of brackets structured data like this
@@ -137,22 +155,15 @@ For instance .. we want to have some sort of brackets structured data like this
 
 we will face matching the parantheses properly.. the proble in such situations is we have to use an expression which is not even initialized
 
-we have three ways to do it
-**1- Unrecommended way: direct reference**
-The problem with this method is the r is not initialized so the library check for some magic number for object validation to distinguish this scenario ... which is not reliable enough .. this is just for fallback situations
 
-```cpp
-Rule r = Is('(') > (*Any | r ) Is(')');
-```
-
-**2-Better: ```Ref``` operator**
+#### **1- ```Ref``` operator**
 this is a better way .. ```Ref``` operator receives rule reference and wait for parsing to evaluate it .. the down side here is that the developer must maintain the lifetime of the reference while parsing takes place
 
 ```cpp
 Rule r = Is('(') > (*Any | Ref(r) ) Is(')');
 ```
 
-**3-Best: ```Ref``` operator with PlaceHolder**
+#### **2- Better: ```Ref``` operator with PlaceHolder**
 
 Placeholder is a special object that fill the reference gap in expression .. and then we redirect this holder to the right object after initialization phase
 
@@ -166,7 +177,5 @@ ph.Inject(r);
 ```Inject()``` will adjust itself to point to the rule's internal object pointer which is independent of Rule lifetime
 
 > **NOTE:**
-> PlaceHolder object does not touch reference counting of internal objects, so avoid using it with other rules objects.. this may leave to dangling pointer
+> PlaceHolder object does not touch reference counting of internal objects, so avoid using it with other rules objects.. this may leave to dangling pointer.. instead you can directly reference it in the rule 
 
-## Perfromance 
-This is tested on MS VS C++ 2015/GCC 8.3 

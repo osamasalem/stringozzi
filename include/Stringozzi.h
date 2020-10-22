@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2018 Osama Salem
+Copyright (c) 2020 Osama Salem
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
 associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -43,6 +43,7 @@ using namespace std;
 #define CPPVER_2011 201103L
 #define CPPVER_2014 201402L
 #define CPPVER_2017 201703L
+#define CPPVER_2020 202002L
 
 #if __cplusplus < CPPVER_2003
 #error Stringozzi: this version of C++ is not supported
@@ -64,6 +65,49 @@ using namespace std;
 #define CX17_SUPPORTED (1)
 #endif
 
+#if __cplusplus >= CPPVER_2020
+#define CX20_SUPPORTED (1)
+#endif
+
+
+#ifndef CX20_SUPPORTED 
+typedef char char8_t;
+#endif
+
+
+
+#if defined _WIN32 || defined __CYGWIN__
+#ifdef BUILDING_DLL
+#ifdef __GNUC__
+	#define DLL_PUBLIC __attribute__ ((dllexport))
+	#define DLL_PUBLIC_VAR __attribute__ ((dllexport))
+#else // !__GNUC__
+	#define DLL_PUBLIC __declspec(dllexport) 
+	#define DLL_PUBLIC_VAR __declspec(dllexport) 
+#endif //GNUC__
+#else // !BUILDING_DLL
+#ifdef __GNUC__
+#define DLL_PUBLIC __attribute__ ((dllimport))
+#define DLL_PUBLIC_VAR __attribute__ ((dllimport))
+#else // !__GNUC__
+#define DLL_PUBLIC __declspec(dllimport) 
+#define DLL_PUBLIC_VAR __declspec(dllimport) 
+#endif // __GNUC__
+#endif // BUILDING_DLL
+#define DLL_LOCAL
+#else //!defined _WIN32 && !defined __CYGWIN__
+#if __GNUC__ >= 4
+#define DLL_PUBLIC __attribute__ ((visibility ("default")))
+#define DLL_PUBLIC_VAR
+#define DLL_LOCAL  __attribute__ ((visibility ("hidden")))
+#else
+#define DLL_PUBLIC
+#define DLL_PUBLIC_VAR
+#define DLL_LOCAL
+#endif
+#endif
+
+
 #define MAXIMUM(a,b) 	( ( (a) > (b) ) ? (a) : (b))
 
 
@@ -72,11 +116,10 @@ using namespace std;
 #define MAX_ITER	5000
 #endif
 
-#define OBJECT_VALIDITY_MAGICNUMBER 0x900df00d
-#define FLAG_CASEINSENSITIVE	(1 << 0)
-#define FLAG_MATCHNAMED			(1 << 1)
-#define FLAG_MATCHUNNAMED		(1 << 2)
-#define FLAG_IGNORESPACES		(1 << 3)
+#define SPEG_CASEINSENSITIVE	(1 << 0)
+#define SPEG_MATCHNAMED			(1 << 1)
+#define SPEG_MATCHUNNAMED		(1 << 2)
+#define SPEG_IGNORESPACES		(1 << 3)
 
 #define NORMALIZE(__X) ( ((__X)>0)?(1):( ( (__X)<0) ?(-1):0))
 #define	MATCHES_TOKEN "<MATCHES>"
@@ -95,10 +138,11 @@ namespace SPEG
 
 	namespace Utils
 	{
-		unsigned long CharToLower(unsigned long);
-		unsigned long UTF8ToUTF32(const char*);
-		unsigned long UTF8ToUTF32Length(const char*);
-
+		DLL_PUBLIC unsigned long CharToLower(unsigned long);
+		DLL_PUBLIC unsigned long UTF8ToUTF32(const char*);
+		DLL_PUBLIC unsigned long UTF8ToUTF32Length(const char*);
+		DLL_PUBLIC unsigned long UTF16ToUTF32(const char16_t * ptr);
+		DLL_PUBLIC unsigned long UTF16ToUTF32Length(const char16_t* ptr);
 
 
 		template <typename __T>
@@ -117,7 +161,7 @@ namespace SPEG
 		}
 
 		template<>
-		void Decrement<char>(const char** pointer);
+		DLL_PUBLIC void Decrement<char>(const char** pointer);
 
 		template <typename __T>
 		inline unsigned int GetChar(const __T* pointer) {
@@ -129,8 +173,8 @@ namespace SPEG
 			return UTF8ToUTF32(pointer);
 		}
 
-		void SafeIncrement(unsigned long*);
-		void SafeDecrement(unsigned long*);
+		DLL_PUBLIC void SafeIncrement(unsigned long*);
+		DLL_PUBLIC void SafeDecrement(unsigned long*);
 
 		template<typename __CHARTYPE>
 		class Matches
@@ -254,7 +298,7 @@ namespace SPEG
 
 
 			inline bool IsFlagSet(unsigned long flag) {
-				return ((_flags & (flag)) != 0);
+				return ((_flags & (flag)) == flag);
 			}
 
 
@@ -274,7 +318,6 @@ namespace SPEG
 			virtual Utils::Flags& Flags() = 0;
 			virtual const int Compare(SChar c) = 0;
 			virtual const SChar Get() = 0;
-			virtual const SChar Get(SChar c) = 0;
 			virtual Position GetPosition() = 0;
 			virtual void SetPosition(Position pos) = 0;
 			virtual void AddMatch(Position start) = 0;
@@ -307,7 +350,7 @@ namespace SPEG
 			}
 
 			inline const SChar _Get(SChar c) {
-				if (_flags.IsFlagSet(FLAG_CASEINSENSITIVE))
+				if (_flags.IsFlagSet(SPEG_CASEINSENSITIVE))
 					return Utils::CharToLower(c);
 				return c;
 			}
@@ -319,11 +362,6 @@ namespace SPEG
 				unsigned long chr = Utils::GetChar(_pointer);
 				return _Get(chr);
 			}
-
-			virtual const SChar Get(SChar chr) {
-				return _Get(chr);
-			}
-
 
 			Utils::Matches<__CHARTYPE>  Matches() {
 				return _matches;
@@ -339,7 +377,7 @@ namespace SPEG
 
 
 			virtual Position AdjustPosition() {
-				if (_flags.IsFlagSet(FLAG_IGNORESPACES))
+				if (_flags.IsFlagSet(SPEG_IGNORESPACES))
 				{
 					while (Compare(' ') == 0)
 					{
@@ -403,14 +441,14 @@ namespace SPEG
 			}
 
 			inline void AddMatch(const char* key, Position start, Position end) {
-				if (_flags.IsFlagSet(FLAG_MATCHNAMED))
+				if (_flags.IsFlagSet(SPEG_MATCHNAMED))
 				{
 					_matches.Add(key, start, end);
 				}
 			}
 			
 			inline void AddMatch(Position start) {
-				if (_flags.IsFlagSet(FLAG_MATCHUNNAMED))
+				if (_flags.IsFlagSet(SPEG_MATCHUNNAMED))
 				{
 					Core::Position end = GetPosition();
 					if (end > start)
@@ -458,8 +496,8 @@ namespace SPEG
 		public:
 			NormalValidator() : _referenceCount(1) {}
 
-			virtual void AddReference();
-			virtual void Release();
+			DLL_PUBLIC virtual void AddReference();
+			DLL_PUBLIC virtual void Release();
 			virtual void Dispose() {}
 		};
 
@@ -513,6 +551,11 @@ namespace SPEG
 
 		typedef IsValidator<char>  IsValidatorA;
 		typedef IsValidator<wchar_t>  IsValidatorW;
+		typedef IsValidator<char8_t>  IsValidatorU8;
+#ifdef  CX11_SUPPORTED
+		typedef IsValidator<char16_t>  IsValidatorU16;
+		typedef IsValidator<char32_t>  IsValidatorU32;
+#endif
 
 
 		template<typename __CHARTYPE>
@@ -541,8 +584,11 @@ namespace SPEG
 
 		typedef InValidator<char>  InValidatorA;
 		typedef InValidator<wchar_t>  InValidatorW;
+		typedef InValidator<char8_t>  InValidatorU8;
+#ifdef  CX11_SUPPORTED
 		typedef InValidator<char16_t>  InValidatorU16;
 		typedef InValidator<char32_t>  InValidatorU32;
+#endif
 
 		class InChainValidator : public Core::NormalValidator {
 		public:
@@ -600,8 +646,12 @@ namespace SPEG
 
 		typedef BetweenValidator<char>  BetweenValidatorA;
 		typedef BetweenValidator<wchar_t>  BetweenValidatorW;
+		typedef BetweenValidator<char8_t>  BetweenValidatorU8;
+#ifdef  CX11_SUPPORTED
 		typedef BetweenValidator<char16_t>  BetweenValidatorU16;
 		typedef BetweenValidator<char32_t>  BetweenValidatorU32;
+#endif
+
 
 		template<typename __T>
 		class ExactValidator : public Core::NormalValidator {
@@ -630,9 +680,11 @@ namespace SPEG
 
 		typedef ExactValidator<char> ExactValidatorA;
 		typedef ExactValidator<wchar_t> ExactValidatorW;
-		//typedef ExactValidator<char8_t> ExactValidatorU8;
+		typedef ExactValidator<char8_t> ExactValidatorU8;
+#ifdef  CX11_SUPPORTED
 		typedef ExactValidator<char16_t> ExactValidatorU16;
 		typedef ExactValidator<char32_t> ExactValidatorU32;
+#endif
 	}
 
 
@@ -669,8 +721,8 @@ namespace SPEG
 		class GreedyOrValidator : public Core::BinaryValidator {
 
 		public:
-			explicit GreedyOrValidator(Core::StringValidator* s1, Core::StringValidator* s2) :
-				BinaryValidator(s1, s2) {}
+			explicit GreedyOrValidator(Core::StringValidator* op1, Core::StringValidator* op2) :
+				BinaryValidator(op1, op2) {}
 
 			virtual bool Check(Core::ContextInterface& context) const;
 		};
@@ -693,6 +745,13 @@ namespace SPEG
 			virtual bool Check(Core::ContextInterface& context) const;
 		};
 
+		class UntilValidator : public Core::UnaryValidator {
+		public:
+			UntilValidator(Core::StringValidator* op) : UnaryValidator(op) {}
+
+			virtual bool Check(Core::ContextInterface& context) const;
+
+		};
 		class RepeatValidator : public Core::UnaryValidator {
 			unsigned int _maxIter;
 			unsigned int _minIter;
@@ -746,7 +805,7 @@ namespace SPEG
 
 			virtual bool Check(Core::ContextInterface& context) const;
 
-			void Set(const Core::Rule& r);
+			DLL_PUBLIC void Set(const Core::Rule& rule);
 
 		};
 
@@ -844,26 +903,20 @@ namespace SPEG
 		class Rule
 		{
 			Core::StringValidator* _strValid;
-			unsigned long _magicNumber;
 
 
 		public:
 
-			Rule operator=(const Rule& other);
-			Rule() : Core::Rule(new Manipulators::NotValidator(new Primitives::AnyValidator())) {}
+			DLL_PUBLIC Rule operator=(const Rule& other);
+			Rule() : _strValid(new Manipulators::NotValidator(new Primitives::AnyValidator())) {}
 
 
-			Rule(StringValidator* obj) : _magicNumber(OBJECT_VALIDITY_MAGICNUMBER) {
+			Rule(StringValidator* obj){
 				_strValid = obj;
 			}
 
 
-			Rule(const Rule& other) : _magicNumber(OBJECT_VALIDITY_MAGICNUMBER) {
-				if (other._magicNumber != OBJECT_VALIDITY_MAGICNUMBER)
-				{
-					_strValid = new Manipulators::RefValidator(*this);
-					return;
-				}
+			Rule(const Rule& other)  {
 				_strValid = other._strValid;
 				if (_strValid)
 					_strValid->AddReference();
@@ -893,34 +946,34 @@ namespace SPEG
 	namespace Operators
 	{
 		using namespace Core;
-		Rule Sequence(const Rule& a, const Rule& b);
-		Rule operator > (const Rule& a, const Rule b);
-		Rule operator & (const Rule& a, const Rule& b);
-		Rule operator | (const Rule& a, const Rule& b);
-		Rule operator||(const Rule &a, const Rule &b);
+		DLL_PUBLIC Rule Sequence(const Rule& first, const Rule& second);
+		DLL_PUBLIC Rule operator > (const Rule& first, const Rule& second);
+		DLL_PUBLIC Rule operator & (const Rule& first, const Rule& second);
+		DLL_PUBLIC Rule operator | (const Rule& first, const Rule& second);
+		DLL_PUBLIC Rule operator||(const Rule &first, const Rule &second);
 
 		template<typename __CHARTYPE>
 		Rule Is(const __CHARTYPE c) {
 			return new Primitives::IsValidator<__CHARTYPE>(c);
 		}
 
-		Rule Not(const Rule& r);
-		Rule operator! (const Rule& r);
-		Rule ZeroOrOne(const Rule& r);
-		Rule Optional(const Rule& r);
-		Rule ZeroOrMore(const Rule& r, const unsigned int num);
-		Rule ZeroOrMore(const Rule& r);
-		Rule operator* (const Rule& r);
-		Rule Times(const Rule& r, const unsigned int num);
-		Rule operator* (const unsigned int num, const Rule& r);
-		Rule operator* (const Rule& r, const unsigned int num);
-		Rule OneOrMore(const Rule& r, const unsigned int num);
-		Rule OneOrMore(const Rule& r);
-		Rule operator+ (const unsigned int num, const Rule& r);
-		Rule operator+ (const Rule& r, const unsigned int num);
-		Rule operator* (const Utils::Range& rng, const Rule& r);
-		Rule operator* (const Rule& r, const Utils::Range& rng);
-		Rule operator+ (const Rule& r);
+		DLL_PUBLIC Rule Not(const Rule& rule);
+		DLL_PUBLIC Rule operator! (const Rule& rule);
+		DLL_PUBLIC Rule ZeroOrOne(const Rule& rule);
+		DLL_PUBLIC Rule Optional(const Rule& rule);
+		DLL_PUBLIC Rule ZeroOrMore(const Rule& rule, const unsigned int num);
+		DLL_PUBLIC Rule ZeroOrMore(const Rule& rule);
+		DLL_PUBLIC Rule operator* (const Rule& rule);
+		DLL_PUBLIC Rule Times(const Rule& rule, const unsigned int num);
+		DLL_PUBLIC Rule operator* (const unsigned int num, const Rule& rule);
+		DLL_PUBLIC Rule operator* (const Rule& rule, const unsigned int num);
+		DLL_PUBLIC Rule OneOrMore(const Rule& rule, const unsigned int num);
+		DLL_PUBLIC Rule OneOrMore(const Rule& rule);
+		DLL_PUBLIC Rule operator+ (const unsigned int num, const Rule& rule);
+		DLL_PUBLIC Rule operator+ (const Rule& rule, const unsigned int num);
+		DLL_PUBLIC Rule operator* (const Utils::Range& rng, const Rule& rule);
+		DLL_PUBLIC Rule operator* (const Rule& rule, const Utils::Range& rng);
+		DLL_PUBLIC Rule operator+ (const Rule& rule);
 
 		template<typename __CHARTYPE>
 		Rule Between(const __CHARTYPE min, const __CHARTYPE max) {
@@ -944,59 +997,59 @@ namespace SPEG
 			return new Primitives::ExactValidator<__CHARTYPE>(phrase);
 		}
 
-		Rule LookAhead(const Rule& r);
-		Rule LookBack(const Rule& r);
-		Rule operator~ (const Rule& r);
+		DLL_PUBLIC Rule LookAhead(const Rule& rule);
+		DLL_PUBLIC Rule LookBack(const Rule& rule);
+		DLL_PUBLIC Rule operator~ (const Rule& rule);
 
-		extern const Rule Any;
-		extern const Rule Digit;
-		extern const Rule SmallAlphabet;
-		extern const Rule CapitalAlphabet;
-		extern const Rule Alphabet;
-		extern const Rule Alphanumeric;
-		extern const Rule End;
-		extern const Rule Beginning;
-		extern const Rule Symbol;
-		extern const Rule Hex;
-		extern const Rule Octet;
-		extern const Rule BeginningOfLine;
-		extern const Rule EndOfLine;
-		extern const Rule WhiteSpace;
-		extern const Rule WhiteSpaces;
-		extern const Rule Binary;
-		extern const Rule WordEnd;
-		extern const Rule WordStart;
-		extern const Rule Natural;
-		extern const Rule Integer;
-		extern const Rule Rational;
-		extern const Rule Scientific;
-		extern const Rule IPv4;
-		extern const Rule CaseSensitive;
-		extern const Rule CaseInsensitive;
-		extern const Rule InChain;
+		DLL_PUBLIC_VAR extern const Rule Any;
+		DLL_PUBLIC_VAR extern const Rule Digit;
+		DLL_PUBLIC_VAR extern const Rule SmallAlphabet;
+		DLL_PUBLIC_VAR extern const Rule CapitalAlphabet;
+		DLL_PUBLIC_VAR extern const Rule Alphabet;
+		DLL_PUBLIC_VAR extern const Rule Alphanumeric;
+		DLL_PUBLIC_VAR extern const Rule End;
+		DLL_PUBLIC_VAR extern const Rule Beginning;
+		DLL_PUBLIC_VAR extern const Rule Symbol;
+		DLL_PUBLIC_VAR extern const Rule Hex;
+		DLL_PUBLIC_VAR extern const Rule Octet;
+		DLL_PUBLIC_VAR extern const Rule BeginningOfLine;
+		DLL_PUBLIC_VAR extern const Rule EndOfLine;
+		DLL_PUBLIC_VAR extern const Rule WhiteSpace;
+		DLL_PUBLIC_VAR extern const Rule WhiteSpaces;
+		DLL_PUBLIC_VAR extern const Rule Binary;
+		DLL_PUBLIC_VAR extern const Rule WordEnd;
+		DLL_PUBLIC_VAR extern const Rule WordStart;
+		DLL_PUBLIC_VAR extern const Rule Natural;
+		DLL_PUBLIC_VAR extern const Rule Integer;
+		DLL_PUBLIC_VAR extern const Rule Rational;
+		DLL_PUBLIC_VAR extern const Rule Scientific;
+		DLL_PUBLIC_VAR extern const Rule IPv4;
+		DLL_PUBLIC_VAR extern const Rule CaseSensitive;
+		DLL_PUBLIC_VAR extern const Rule CaseInsensitive;
+		DLL_PUBLIC_VAR extern const Rule InChain;
 		//extern const Rule HostName;
 		template<typename __CHARTYPE>
 		Rule Out(const __CHARTYPE* set) {
 			return Any & Not(In(set));
 		}
 
-		Rule Skip(const Rule& r);
-		Rule Skip(const unsigned long count);
-		Rule Until(const Rule& r);
-		Rule Extract(const Rule& r, const char* key);
-		Rule Extract(const Rule& r);
-		Rule operator >> (const Rule& r, const char* key);
-		Rule Enclosed(const Rule& r, const char* quote);
-		Rule Enclosed(const Rule& r, const char* open, const char* close);
-		Rule Set(const char* f);
-		Rule Set(const char* f, const char* v);
-		Rule Del(const char* f);
-		Rule If(const char* f);
-		Rule If(const char* f, const char* v);
-		Rule Ref(const Rule& r);
-		Rule IfMatched(const char* key);
-		Rule IfMatched(const char* key, unsigned long min);
-		Rule IfMatched(const char* key, unsigned long min, unsigned long max);
+		DLL_PUBLIC Rule SkipTo(const Rule& r);
+		DLL_PUBLIC Rule SkipTo(const unsigned long count);
+		DLL_PUBLIC Rule Until(const Rule& r);
+		DLL_PUBLIC Rule Extract(const Rule& r, const char* key);
+		DLL_PUBLIC Rule Extract(const Rule& r);
+		DLL_PUBLIC Rule operator >> (const Rule& r, const char* key);
+		DLL_PUBLIC Rule Enclosed(const Rule& r, const char* quote);
+		DLL_PUBLIC Rule Enclosed(const Rule& r, const char* open, const char* close);
+		DLL_PUBLIC Rule Set(const char* f);
+		DLL_PUBLIC Rule Set(const char* f, const char* v);
+		DLL_PUBLIC Rule Del(const char* f);
+		DLL_PUBLIC Rule If(const char* f);
+		DLL_PUBLIC Rule If(const char* f, const char* v);
+		DLL_PUBLIC Rule Ref(const Rule& r);
+		DLL_PUBLIC Rule IfMatched(const char* key);
+		DLL_PUBLIC Rule IfMatched(const char* key, unsigned long min);
+		DLL_PUBLIC Rule IfMatched(const char* key, unsigned long min, unsigned long max);
 	}
 
 
@@ -1020,7 +1073,7 @@ namespace SPEG
 		}
 
 		bool Search(const __CHARTYPE* str, unsigned long flags = 0) {
-			Core::Context<__CHARTYPE> context(str, flags, NULL);
+			Core::Context<__CHARTYPE> context(str, flags);
 			Core::Rule r = Operators::Until(_rule);
 			return r.Check(context);
 		}
@@ -1047,7 +1100,7 @@ namespace SPEG
 
 		bool Match(const __CHARTYPE* str, Utils::Matches<__CHARTYPE>& matches, unsigned long flags = 0) {
 			
-			flags = flags | FLAG_MATCHNAMED | FLAG_MATCHUNNAMED; 
+			flags = flags | SPEG_MATCHNAMED | SPEG_MATCHUNNAMED; 
 			const __CHARTYPE* ptr = SearchAndGetPtr(str, flags);
 			if (!ptr)
 				return false;
@@ -1124,9 +1177,11 @@ namespace SPEG
 
 	typedef Stringozzi<char> StringozziA;
 	typedef Stringozzi<wchar_t> StringozziW;
+	typedef Stringozzi<char8_t> StringozziU8;
+#ifdef  CX11_SUPPORTED
 	typedef Stringozzi<char16_t> StringozziU16;
 	typedef Stringozzi<char32_t> StringozziU32;
-
+#endif
 
 
 
@@ -1142,12 +1197,15 @@ namespace SPEG
 			}
 
 
-			void Inject(const Core::Rule& r);
+			void Inject(const Core::Rule& r)
+			{
+				_ref->Set(r);
+			}
 		};
 	}
 
 	namespace Operators {
-		Core::Rule Ref(Utils::PlaceHolder& ph);
+		DLL_PUBLIC Core::Rule Ref(Utils::PlaceHolder& ph);
 	}
 
 	namespace Actions
@@ -1190,17 +1248,14 @@ namespace SPEG
 		}
 
 		template<typename __CHARTYPE>
-		bool Split(const Core::Rule& _rule, __CHARTYPE* str, vector<basic_string<__CHARTYPE>>& v
+		bool Split(const Core::Rule& _rule, __CHARTYPE* str, vector<basic_string<__CHARTYPE> >& v
 			, unsigned long flags = 0
 			, bool dropEmpty = true
 			, unsigned int count = 1)
 		{
 			return Stringozzi<__CHARTYPE>(_rule).Split(str, v, flags, dropEmpty, count);
 		}
-
-
 	}
-
 }
 
 

@@ -15,7 +15,7 @@ before_script:
 script: 
     - cmake -DSTRINGOZZI_TRAVIS_BUILD=TRUE ..
     - cmake --build .
-    - cppcheck  --verbose --enable=all ../src/parser.cpp ../include/parser.h ../test/parser.test.cpp
+    - cppcheck  --verbose --enable=all ../src/*.cpp ../include/*.h ../test/*.cpp
     - ../bin/stringozzi.test
     - doxygen ../docs/Doxyfile
 
