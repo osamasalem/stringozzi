@@ -135,6 +135,8 @@ TEST(Utils, TestFlags) {
 
 }
 
+#ifdef CX11_SUPPORTED
+
 TEST(Utils, TestUTF8ToUTF32) {
   ASSERT_EQ(Utils::UTF8ToUTF32(u8"$"), 0x24);
   ASSERT_EQ(Utils::UTF8ToUTF32(u8"¢"), 0xA2);
@@ -157,7 +159,6 @@ TEST(Utils, TestUTF8ToUTF32Length) {
 
 }
 
-#ifdef CX11_SUPPORTED
 TEST(Utils, TestUTF16ToUTF32) {
   ASSERT_EQ(Utils::UTF16ToUTF32(u"$"), 0x24);
   ASSERT_EQ(Utils::UTF16ToUTF32(u"¢"), 0xA2);
