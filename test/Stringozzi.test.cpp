@@ -135,29 +135,30 @@ TEST(Utils, TestFlags) {
 
 }
 
-#ifdef CX11_SUPPORTED
 
 TEST(Utils, TestUTF8ToUTF32) {
-  ASSERT_EQ(Utils::UTF8ToUTF32(u8"$"), 0x24);
-  ASSERT_EQ(Utils::UTF8ToUTF32(u8"¢"), 0xA2);
-  ASSERT_EQ(Utils::UTF8ToUTF32(u8"ह"), 0x939);
-  ASSERT_EQ(Utils::UTF8ToUTF32(u8"€"), 0x20AC);
-  ASSERT_EQ(Utils::UTF8ToUTF32(u8"한"), 0xD55C);
-  ASSERT_EQ(Utils::UTF8ToUTF32(u8"𐍈"), 0x10348);
-  ASSERT_EQ(Utils::UTF8ToUTF32(u8""), 0);
+  ASSERT_EQ(Utils::UTF8ToUTF32("\x24"), 0x24);
+  ASSERT_EQ(Utils::UTF8ToUTF32("\xC2\xA2"), 0xA2);
+  ASSERT_EQ(Utils::UTF8ToUTF32("\xE0\xA4\xB9"), 0x939);
+  ASSERT_EQ(Utils::UTF8ToUTF32("\xE2\x82\xAC"), 0x20AC);
+  ASSERT_EQ(Utils::UTF8ToUTF32("\xED\x95\x9C"), 0xD55C);
+  ASSERT_EQ(Utils::UTF8ToUTF32("\xF0\x90\x8D\x88"), 0x10348);
+  ASSERT_EQ(Utils::UTF8ToUTF32(""), 0);
 
 }
 
 TEST(Utils, TestUTF8ToUTF32Length) {
-  ASSERT_EQ(Utils::UTF8ToUTF32Length(u8"$"), 1);
-  ASSERT_EQ(Utils::UTF8ToUTF32Length(u8"¢"), 2);
-  ASSERT_EQ(Utils::UTF8ToUTF32Length(u8"ह"), 3);
-  ASSERT_EQ(Utils::UTF8ToUTF32Length(u8"€"), 3);
-  ASSERT_EQ(Utils::UTF8ToUTF32Length(u8"한"), 3);
-  ASSERT_EQ(Utils::UTF8ToUTF32Length(u8"𐍈"), 4);
+  ASSERT_EQ(Utils::UTF8ToUTF32Length("\x24"), 1);
+  ASSERT_EQ(Utils::UTF8ToUTF32Length("\xC2\xA2"), 2);
+  ASSERT_EQ(Utils::UTF8ToUTF32Length("\xE0\xA4\xB9"), 3);
+  ASSERT_EQ(Utils::UTF8ToUTF32Length("\xE2\x82\xAC"), 3);
+  ASSERT_EQ(Utils::UTF8ToUTF32Length("\xED\x95\x9C"), 3);
+  ASSERT_EQ(Utils::UTF8ToUTF32Length("\xF0\x90\x8D\x88"), 4);
   ASSERT_EQ(Utils::UTF8ToUTF32Length(u8""), 1);
 
 }
+
+#ifdef CX11_SUPPORTED
 
 TEST(Utils, TestUTF16ToUTF32) {
   ASSERT_EQ(Utils::UTF16ToUTF32(u"$"), 0x24);
