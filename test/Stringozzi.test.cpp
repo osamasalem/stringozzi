@@ -87,7 +87,8 @@ TEST(StateKeepers, TestCaseModifier) {
 TEST(Primitives, TestBOT) {
   ASSERT_TRUE(Actions::Search(Beginning > Is("B") > End, "B"));
   ASSERT_FALSE(Actions::Search(Beginning > Is("B") > End, "     B"));
-  ASSERT_TRUE(Actions::Search(Beginning > Is("B") > End, "     B", SPEG_IGNORESPACES));
+  ASSERT_TRUE(Actions::Search(Beginning > Is("B") > End, "     B"
+                  , SPEG_IGNORESPACES));
 }
 
 TEST(Utils, TestFlags) {
@@ -145,17 +146,6 @@ TEST(Utils, TestUTF8ToUTF32) {
 
 }
 
-TEST(Utils, TestUTF16ToUTF32) {
-  ASSERT_EQ(Utils::UTF16ToUTF32(u"$"), 0x24);
-  ASSERT_EQ(Utils::UTF16ToUTF32(u"¢"), 0xA2);
-  ASSERT_EQ(Utils::UTF16ToUTF32(u"ह"), 0x939);
-  ASSERT_EQ(Utils::UTF16ToUTF32(u"€"), 0x20AC);
-  ASSERT_EQ(Utils::UTF16ToUTF32(u"한"), 0xD55C);
-  ASSERT_EQ(Utils::UTF16ToUTF32(u"𐍈"), 0x10348);
-  ASSERT_EQ(Utils::UTF16ToUTF32(u""), 0);
-
-}
-
 TEST(Utils, TestUTF8ToUTF32Length) {
   ASSERT_EQ(Utils::UTF8ToUTF32Length(u8"$"), 1);
   ASSERT_EQ(Utils::UTF8ToUTF32Length(u8"¢"), 2);
@@ -164,6 +154,18 @@ TEST(Utils, TestUTF8ToUTF32Length) {
   ASSERT_EQ(Utils::UTF8ToUTF32Length(u8"한"), 3);
   ASSERT_EQ(Utils::UTF8ToUTF32Length(u8"𐍈"), 4);
   ASSERT_EQ(Utils::UTF8ToUTF32Length(u8""), 1);
+
+}
+
+#ifdef CX11_SUPPORTED
+TEST(Utils, TestUTF16ToUTF32) {
+  ASSERT_EQ(Utils::UTF16ToUTF32(u"$"), 0x24);
+  ASSERT_EQ(Utils::UTF16ToUTF32(u"¢"), 0xA2);
+  ASSERT_EQ(Utils::UTF16ToUTF32(u"ह"), 0x939);
+  ASSERT_EQ(Utils::UTF16ToUTF32(u"€"), 0x20AC);
+  ASSERT_EQ(Utils::UTF16ToUTF32(u"한"), 0xD55C);
+  ASSERT_EQ(Utils::UTF16ToUTF32(u"𐍈"), 0x10348);
+  ASSERT_EQ(Utils::UTF16ToUTF32(u""), 0);
 
 }
 
@@ -177,7 +179,7 @@ TEST(Utils, TestUTF16ToUTF32Length) {
   ASSERT_EQ(Utils::UTF16ToUTF32Length(u""), 1);
 
 }
-
+#endif
 
 TEST(Operators, TestNumbers) {
   ASSERT_TRUE(StringozziA(Rational).Test("2"));

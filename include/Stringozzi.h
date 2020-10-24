@@ -182,6 +182,7 @@ DLL_PUBLIC SChar UTF8ToUTF32(const char* ptr);
  */
 DLL_PUBLIC unsigned long UTF8ToUTF32Length(const char* ptr);
 
+#ifdef CX11_SUPPORTED
 /**
  * @brief Convert UTF16 char to UTF32 
  * 
@@ -197,6 +198,7 @@ DLL_PUBLIC SChar UTF16ToUTF32(const char16_t * ptr);
  * @return unsigned long size in chars 
  */
 DLL_PUBLIC unsigned long UTF16ToUTF32Length(const char16_t* ptr);
+#endif
 
 /**
  * @brief Increment (move forward) the pointer one step 
@@ -843,6 +845,11 @@ template<typename __CHARTYPE>
 class IsValidator : public Core::NormalValidator {
   const __CHARTYPE _character;
  public:
+ /**
+  * @brief Construct a new Is Validator object
+  * 
+  * @param chr the charcter which will compared to 
+  */
   explicit IsValidator(__CHARTYPE chr) : _character(chr) {}
   virtual bool Check(Core::ContextInterface* context)const {
     context->AdjustPosition();
@@ -874,6 +881,11 @@ template<typename __CHARTYPE>
 class InValidator : public Core::NormalValidator {
   const __CHARTYPE* _set;
  public:
+ /**
+  * @brief Construct a new In Validator object
+  * 
+  * @param set the string that contains character set
+  */
   explicit InValidator(const __CHARTYPE* set) : _set(set) {}
   virtual bool Check(Core::ContextInterface* context)const {
     context->AdjustPosition();
@@ -945,10 +957,18 @@ class BetweenValidator : public Core::NormalValidator {
   __CHARTYPE _max;
 
  public:
+ /**
+  * @brief Construct a new Between Validator object
+  * 
+  * @param min lower bound
+  * @param max upper bound
+  */
   BetweenValidator(const __CHARTYPE min, const __CHARTYPE max)
     : _min(min)
     , _max(max) {}
 
+  // TODO(osamamsalem) : the character operations and conversion
+  // should be revised
   explicit BetweenValidator(const __CHARTYPE* range)
     : _min(0)
     , _max(0) {
@@ -983,7 +1003,7 @@ typedef BetweenValidator<char32_t>  BetweenValidatorU32;
  * @brief it recieves a string containing a sequence of characters 
  * if the character under the cursor follows the same context it returns 
  * true.. false otherwise 
- * @tparam __T 
+ * @tparam __T characted type
  */
 template<typename __T>
 class ExactValidator : public Core::NormalValidator {

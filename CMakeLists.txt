@@ -31,8 +31,8 @@ ADD_LIBRARY( stringozzi-shared SHARED		src/Stringozzi.cpp )
 
 ADD_SUBDIRECTORY(googletest/)
 
-ADD_EXECUTABLE(stringozzi.test test/Stringozzi.test.cpp )
-TARGET_LINK_LIBRARIES(stringozzi.test gtest stringozzi-shared)
+ADD_EXECUTABLE(stringozzi.test test/Stringozzi.test.cpp src/Stringozzi.cpp)
+TARGET_LINK_LIBRARIES(stringozzi.test gtest)
 
 ENABLE_TESTING()
 ADD_TEST(stringozzi.test stringozzi.test)

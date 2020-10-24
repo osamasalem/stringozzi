@@ -86,6 +86,8 @@ DLL_PUBLIC unsigned long UTF8ToUTF32Length(const char *ptr) {
   return 1;
 }
 
+#ifdef CX11_SUPPORTED
+
 DLL_PUBLIC unsigned long UTF16ToUTF32(const char16_t * ptr) {
   unsigned long out = 0;
   if ((*ptr & 0xFC00) == 0xD800) {
@@ -108,6 +110,7 @@ DLL_PUBLIC unsigned long UTF16ToUTF32Length(const char16_t* ptr) {
   }
   return 1;
 }
+#endif
 
 #ifdef _MSC_VER
 
