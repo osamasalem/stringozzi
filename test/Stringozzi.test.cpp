@@ -154,7 +154,7 @@ TEST(Utils, TestUTF8ToUTF32Length) {
   ASSERT_EQ(Utils::UTF8ToUTF32Length("\xE2\x82\xAC"), 3);
   ASSERT_EQ(Utils::UTF8ToUTF32Length("\xED\x95\x9C"), 3);
   ASSERT_EQ(Utils::UTF8ToUTF32Length("\xF0\x90\x8D\x88"), 4);
-  ASSERT_EQ(Utils::UTF8ToUTF32Length(u8""), 1);
+  ASSERT_EQ(Utils::UTF8ToUTF32Length(""), 1);
 
 }
 
