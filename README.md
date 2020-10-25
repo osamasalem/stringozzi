@@ -114,7 +114,7 @@ int main(int argc, char** argv)
 | LookBack(_rule_) | it peeks the previous token and checks if it matches _rule_, it does not move parsing pointer |
 | CaseSensitive | this will set case sensitive mode in parsing process |
 | CaseSensitive | this will set case insensitive mode in parsing process |
-| SetVar(varname,_[value]_) | this will always match .. this sets a flag/variable with specified value.. if no value is supplied the default will be ```1``` |
+| SetVar(varname,_[value]_) | this will  match all the time .. this sets a flag/variable with specified value.. if no value is supplied the default will be ```1``` |
 | DelVar(varname) | this will match always .. this is remove flag/variable  |
 | ifVar() | checks if the sored named var equals the specified value | 
 

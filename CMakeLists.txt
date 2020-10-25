@@ -27,9 +27,10 @@ SET( CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG 	${CMAKE_CURRENT_LIST_DIR}/bin_${CMAKE
 # Stringozzi
 #********************************************************
 ADD_LIBRARY( stringozzi-static			src/Stringozzi.cpp )
+
 ADD_LIBRARY( stringozzi-shared SHARED		src/Stringozzi.cpp )
 
-ADD_SUBDIRECTORY(googletest/)
+ADD_SUBDIRECTORY(googletest/ ./bin  EXCLUDE_FROM_ALL)
 
 ADD_EXECUTABLE(stringozzi.test test/Stringozzi.test.cpp src/Stringozzi.cpp)
 TARGET_LINK_LIBRARIES(stringozzi.test gtest)

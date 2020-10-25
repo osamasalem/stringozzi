@@ -1,3 +1,14 @@
+/**
+ * @file Stringozzi.cpp
+ * @author Osama Salem (usamamsalem@yahoo.com)
+ * @brief the main implementation file 
+ * @version 2.0.0.0
+ * @date 2020-10-25
+ * 
+ * @copyright Copyright (c) 2020
+ * 
+ */
+
 /*
 MIT License
 
@@ -255,7 +266,6 @@ bool NotValidator::Check(Core::ContextInterface* context) const {
     context->SetPosition(start);
     return false;
   }
-  context->AddMatch(start);
   return true;
 }
 

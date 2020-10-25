@@ -1,3 +1,13 @@
+/**
+ * @file Stringozzi.h
+ * @author Osama Salem (usamamsalem@yahoo.com)
+ * @brief  the main include file 
+ * @version 2.0.0.0
+ * @date 2020-10-25
+ * 
+ * @copyright Copyright (c) Osama Salem 2020
+ * 
+ */
 /*
 MIT License
 
@@ -773,7 +783,7 @@ class StringValidator {
 class NormalValidator : public StringValidator {
   unsigned long _referenceCount;
  public:
-  NormalValidator() : _referenceCount(1) {}
+  NormalValidator() : _referenceCount(0) {}
 
   DLL_PUBLIC virtual void AddReference();
   DLL_PUBLIC virtual void Release();
@@ -1009,6 +1019,11 @@ template<typename __T>
 class ExactValidator : public Core::NormalValidator {
   const __T* _phrase;
  public:
+ /**
+  * @brief Construct a new Exact Validator object
+  * 
+  * @param phrase the phrase which the text will be compared with
+  */
   explicit ExactValidator(const __T* phrase) : _phrase(phrase) {}
 
   virtual bool Check(Core::ContextInterface* context) const {
@@ -1039,8 +1054,17 @@ typedef ExactValidator<char32_t> ExactValidatorU32;
 }  // namespace Primitives
 
 
+/**
+ * @brief Manipulators is special validators that receives and executes other
+ * child validator and take decisions based on their results
+ * 
+ */
 namespace Manipulators {
 
+/**
+ * @brief Executes the operands sequentially the first then second
+ * 
+ */
 class SeqValidator : public Core::BinaryValidator {
  public:
   explicit SeqValidator(Core::StringValidator* s1, Core::StringValidator* s2) :
@@ -1048,6 +1072,11 @@ class SeqValidator : public Core::BinaryValidator {
   virtual bool Check(Core::ContextInterface* context) const;
 };
 
+/**
+ * @brief perform And operation between the two operations results . so if one
+ * of them failed it will fail this operation and restore cursor positions 
+ * 
+ */
 class AndValidator : public Core::BinaryValidator {
  public:
   explicit AndValidator(Core::StringValidator* s1, Core::StringValidator* s2) :
@@ -1056,6 +1085,12 @@ class AndValidator : public Core::BinaryValidator {
   virtual bool Check(Core::ContextInterface* context) const;
 };
 
+/**
+ * @brief perform Or operation between the two operations results . it applies 
+ * the first successful operation.. if both are failed it will fail this 
+ * operation and restore cursor positions
+ * 
+ */
 class OrValidator : public Core::BinaryValidator {
  public:
   explicit OrValidator(Core::StringValidator* s1, Core::StringValidator* s2) :
@@ -1064,6 +1099,12 @@ class OrValidator : public Core::BinaryValidator {
   virtual bool Check(Core::ContextInterface* context) const;
 };
 
+/**
+ * @brief perform Or operation between the two operations results . it applies 
+ * the the most relevant match.. if both are failed it will fail this 
+ * operation and restore cursor positions
+ * 
+ */
 class GreedyOrValidator : public Core::BinaryValidator {
  public:
   explicit GreedyOrValidator(Core::StringValidator* op1
@@ -1072,6 +1113,11 @@ class GreedyOrValidator : public Core::BinaryValidator {
   virtual bool Check(Core::ContextInterface* context) const;
 };
 
+/**
+ * @brief it negates the operation result ... this operation does not move
+ * parsing cursor  
+ * 
+ */
 class NotValidator : public Core::UnaryValidator {
  public:
   explicit NotValidator(Core::StringValidator* op)
@@ -1079,6 +1125,11 @@ class NotValidator : public Core::UnaryValidator {
   virtual bool Check(Core::ContextInterface* context) const;
 };
 
+/**
+ * @brief it peeks the next token and checks if it matches the input 
+ * rule, it does not move parsing pointer
+ * 
+ */
 class LookAheadValidator : public Core::UnaryValidator {
  public:
   explicit LookAheadValidator(StringValidator* op)
@@ -1086,6 +1137,11 @@ class LookAheadValidator : public Core::UnaryValidator {
   virtual bool Check(Core::ContextInterface* context) const;
 };
 
+/**
+ * @brief it peeks the previous token and checks if it matches the input 
+ * rule, it does not move parsing pointer
+ * 
+ */
 class LookBackValidator : public Core::UnaryValidator {
  public:
   explicit LookBackValidator(Core::StringValidator* op)
@@ -1093,6 +1149,11 @@ class LookBackValidator : public Core::UnaryValidator {
   virtual bool Check(Core::ContextInterface* context) const;
 };
 
+/**
+ * @brief Used in searches ... skips successive character till 
+ * the input rule matches
+ * 
+ */
 class UntilValidator : public Core::UnaryValidator {
  public:
   explicit UntilValidator(Core::StringValidator* op)
@@ -1100,7 +1161,11 @@ class UntilValidator : public Core::UnaryValidator {
 
   virtual bool Check(Core::ContextInterface* context) const;
 };
-
+/**
+ * @brief Repeat the input rule for a number of times .. and validate
+ * if it is matched for a specified times 
+ * 
+ */
 class RepeatValidator : public Core::UnaryValidator {
   unsigned int _maxIter;
   unsigned int _minIter;
@@ -1126,6 +1191,11 @@ class RepeatValidator : public Core::UnaryValidator {
   virtual bool Check(Core::ContextInterface* context) const;
 };
 
+/**
+ * @brief if the input rule matches ... the matched token is added 
+ * to the matches table
+ * 
+ */
 class ExtractValidator : public Core::UnaryValidator {
   const char* _key;
  public:
@@ -1142,7 +1212,10 @@ class ExtractValidator : public Core::UnaryValidator {
 };
 
 
-
+/**
+ * @brief used in circular recursive rules .. it points to uninitialized rule
+ * 
+ */
 class RefValidator : public Core::NormalValidator {
   Core::StringValidator* _validator;
   const Core::Rule* _rule;
@@ -1156,7 +1229,16 @@ class RefValidator : public Core::NormalValidator {
 };
 }  // namespace Manipulators
 
+/**
+ * @brief this namespace includes all classes that relates to parsing status,
+ * all classes in this namespace do not move cursor position 
+ * 
+ */
 namespace StateKeepers {
+  /**
+   * @brief Alter the case sensitivity modes in the parsing process
+   * 
+   */
 class CaseModifier : public Core::NormalValidator {
   bool _caseSensitive;
 
@@ -1165,6 +1247,10 @@ class CaseModifier : public Core::NormalValidator {
   virtual bool Check(Core::ContextInterface* context) const;
 };
 
+/**
+ * @brief Validator Set context variable 
+ * 
+ */
 class SetFlagModifier : public Core::NormalValidator {
   const char* _flag;
   const char* _value;
@@ -1181,6 +1267,10 @@ class SetFlagModifier : public Core::NormalValidator {
   virtual bool Check(Core::ContextInterface* context) const;
 };
 
+/**
+ * @brief Delete (unset) context variable
+ * 
+ */
 class DelFlagModifier : public Core::NormalValidator {
   const char* _flag;
 
@@ -1192,6 +1282,10 @@ class DelFlagModifier : public Core::NormalValidator {
   virtual bool Check(Core::ContextInterface* context) const;
 };
 
+/**
+ * @brief checks if context variable equals value
+ * 
+ */
 class IfValidator : public Core::NormalValidator {
   const char* _flag;
   const char* _value;
@@ -1210,6 +1304,10 @@ class IfValidator : public Core::NormalValidator {
   virtual bool Check(Core::ContextInterface* context) const;
 };
 
+/**
+ * @brief checks if named match is already matched
+ * 
+ */
 class IfMatchedValidator : public Core::NormalValidator {
   const char* _key;
   const unsigned long _min;
@@ -1244,10 +1342,21 @@ class IfMatchedValidator : public Core::NormalValidator {
 
 
 namespace Core {
+  /**
+   * @brief Rule is handler of a parsing tree and handles the reference couting
+   * of its elements 
+   * 
+   */
 class Rule {
   Core::StringValidator* _strValid;
 
  public:
+ /**
+  * @brief equal operator 
+  * 
+  * @param other RHS Rule 
+  * @return DLL_PUBLIC LHS Rule
+  */
   DLL_PUBLIC Rule operator=(const Rule& other);
   Rule() : _strValid(
     new Manipulators::NotValidator(
@@ -1255,6 +1364,7 @@ class Rule {
 
   Rule(StringValidator* obj) {
     _strValid = obj;
+    _strValid->AddReference();
   }
 
 
@@ -1280,126 +1390,623 @@ class Rule {
 };
 }  // namespace Core
 
+/**
+ * @brief  the operators that construct Stringozzi Rule
+ * 
+ */
 namespace Operators {
 using namespace Core;
-DLL_PUBLIC Rule Sequence(const Rule& first, const Rule& second);
-DLL_PUBLIC Rule operator > (const Rule& first, const Rule& second);
+/** 
+ * @brief A then B 
+ */
+DLL_PUBLIC Rule Sequence(const Rule& first, const Rule& second); 
+/**
+ * @brief A then B 
+ * 
+ * @param first 
+ * @param second 
+ * @return DLL_PUBLIC 
+ */
+DLL_PUBLIC Rule operator > (const Rule& first, const Rule& second); 
+/**
+ * @brief A and B
+ * 
+ * @param first 
+ * @param second 
+ * @return DLL_PUBLIC 
+ */
 DLL_PUBLIC Rule operator & (const Rule& first, const Rule& second);
+/**
+ * @brief A or B
+ * 
+ * @param first 
+ * @param second 
+ * @return DLL_PUBLIC 
+ */
 DLL_PUBLIC Rule operator | (const Rule& first, const Rule& second);
+/**
+ * @brief  A or B with best relevance
+ * 
+ * @param first 
+ * @param second 
+ * @return DLL_PUBLIC 
+ */
 DLL_PUBLIC Rule operator ||(const Rule &first, const Rule &second);
 
+/**
+ * @brief Is Exact char c 
+ * 
+ * @tparam __CHARTYPE 
+ * @param chr 
+ * @return Rule 
+ */
 template<typename __CHARTYPE>
 Rule Is(const __CHARTYPE chr) {
   return new Primitives::IsValidator<__CHARTYPE>(chr);
 }
 
+/**
+ * @brief Not A
+ * 
+ * @param rule 
+ * @return DLL_PUBLIC 
+ */
 DLL_PUBLIC Rule Not(const Rule& rule);
+/**
+ * @brief Not A
+ * 
+ * @param rule 
+ * @return DLL_PUBLIC 
+ */
 DLL_PUBLIC Rule operator! (const Rule& rule);
+
+/**
+ * @brief (0->1) * A
+ * 
+ * @param rule 
+ * @return DLL_PUBLIC 
+ */
 DLL_PUBLIC Rule ZeroOrOne(const Rule& rule);
+
+/**
+ * @brief A valid either matched or not
+ * 
+ * @param rule 
+ * @return DLL_PUBLIC 
+ */
 DLL_PUBLIC Rule Optional(const Rule& rule);
+
+/**
+ * @brief (0->num)* A 
+ * 
+ * @param rule 
+ * @param num 
+ * @return DLL_PUBLIC 
+ */
 DLL_PUBLIC Rule ZeroOrMore(const Rule& rule, const unsigned int num);
+/**
+ * @brief (0->INFINITY) * A 
+ * 
+ * @param rule 
+ * @return DLL_PUBLIC 
+ */
 DLL_PUBLIC Rule ZeroOrMore(const Rule& rule);
+
+/**
+ * @brief Exact instances of  A
+ * 
+ * @param rule 
+ * @return DLL_PUBLIC 
+ */
 DLL_PUBLIC Rule operator* (const Rule& rule);
+
+/**
+ * @brief n times of A 
+ * 
+ * @param rule 
+ * @param num 
+ * @return DLL_PUBLIC 
+ */
 DLL_PUBLIC Rule Times(const Rule& rule, const unsigned int num);
+
+/**
+ * @brief n times of A 
+ * 
+ * @param num 
+ * @param rule 
+ * @return DLL_PUBLIC 
+ */
 DLL_PUBLIC Rule operator* (const unsigned int num, const Rule& rule);
+
+/**
+ * @brief n times of A 
+ * 
+ * @param rule 
+ * @param num 
+ * @return DLL_PUBLIC 
+ */
 DLL_PUBLIC Rule operator* (const Rule& rule, const unsigned int num);
+
+/**
+ * @brief (1->num) times of A 
+ * 
+ * @param rule 
+ * @param num 
+ * @return DLL_PUBLIC 
+ */
 DLL_PUBLIC Rule OneOrMore(const Rule& rule, const unsigned int num);
+
+/**
+ * @brief (1->num) times of A 
+ * 
+ * @param rule 
+ * @return DLL_PUBLIC 
+ */
 DLL_PUBLIC Rule OneOrMore(const Rule& rule);
+s
+/**
+ * @brief (1->num) times of A 
+ * 
+ * @param num 
+ * @param rule 
+ * @return DLL_PUBLIC 
+ */
 DLL_PUBLIC Rule operator+ (const unsigned int num, const Rule& rule);
+
+/**
+ * @brief (1->num) times of A
+ * 
+ * @param rule 
+ * @param num 
+ * @return DLL_PUBLIC 
+ */
 DLL_PUBLIC Rule operator+ (const Rule& rule, const unsigned int num);
+
+/**
+ * @brief (min->max) times of A 
+ * 
+ * @param rng 
+ * @param rule 
+ * @return DLL_PUBLIC 
+ */
 DLL_PUBLIC Rule operator* (const Utils::Range& rng, const Rule& rule);
+
+/**
+ * @brief (min->max) times of A 
+ * 
+ * @param rule 
+ * @param rng 
+ * @return DLL_PUBLIC 
+ */
 DLL_PUBLIC Rule operator* (const Rule& rule, const Utils::Range& rng);
+
+/**
+ * @brief (1->INFINITY) times of A 
+ * 
+ * @param rule 
+ * @return DLL_PUBLIC 
+ */
 DLL_PUBLIC Rule operator+ (const Rule& rule);
 
+/**
+ * @brief char between (min < c < max)
+ * 
+ * @tparam __CHARTYPE 
+ * @param min 
+ * @param max 
+ * @return Rule 
+ */
 template<typename __CHARTYPE>
 Rule Between(const __CHARTYPE min, const __CHARTYPE max) {
   return new Primitives::BetweenValidator<__CHARTYPE>(min, max);
 }
 
+/**
+ * @brief char between (min < c < max)
+ * 
+ * @tparam __CHARTYPE 
+ * @param range 
+ * @return Rule 
+ */
 template<typename __CHARTYPE>
 Rule Between(const __CHARTYPE* range) {
   return new Primitives::BetweenValidator<__CHARTYPE>(range);
 }
 
-
+/**
+ * @brief A in { a,b,c...} 
+ * 
+ * @tparam __CHARTYPE 
+ * @param set 
+ * @return Rule 
+ */
 template<typename __CHARTYPE>
 Rule In(const __CHARTYPE* set) {
   return new Primitives::InValidator<__CHARTYPE>(set);
 }
 
 
+/**
+ * @brief Exact A == "phrase"
+ * 
+ * @tparam __CHARTYPE 
+ * @param phrase 
+ * @return Rule 
+ */
 template<typename __CHARTYPE>
 Rule Is(const __CHARTYPE* phrase) {
   return new Primitives::ExactValidator<__CHARTYPE>(phrase);
 }
 
+/**
+ * @brief Peek next rule
+ * 
+ * @param rule 
+ * @return DLL_PUBLIC 
+ */
 DLL_PUBLIC Rule LookAhead(const Rule& rule);
-DLL_PUBLIC Rule LookBack(const Rule& rule);
-DLL_PUBLIC Rule operator~ (const Rule& rule);
 
+/**
+ * @brief Peek previous rule
+ * 
+ * @param rule 
+ * @return DLL_PUBLIC 
+ */
+DLL_PUBLIC Rule LookBack(const Rule& rule);
+
+/**
+ * @brief Optional A
+ * 
+ * @param rule 
+ * @return DLL_PUBLIC 
+ */
+DLL_PUBLIC Rule operator~ (const Rule& rule);
+/**
+ * @brief Any
+ * 
+ */
 DLL_PUBLIC_VAR extern const Rule Any;
+
+/**
+ * @brief 0->9 
+ * 
+ */
 DLL_PUBLIC_VAR extern const Rule Digit;
+
+/**
+ * @brief a->z
+ * 
+ */
 DLL_PUBLIC_VAR extern const Rule SmallAlphabet;
+
+/**
+ * @brief A->Z
+ * 
+ */
 DLL_PUBLIC_VAR extern const Rule CapitalAlphabet;
+
+/**
+ * @brief a->z or A->Z
+ * 
+ */
 DLL_PUBLIC_VAR extern const Rule Alphabet;
+
+/**
+ * @brief a->z or A->Z or 0->9
+ * 
+ */
 DLL_PUBLIC_VAR extern const Rule Alphanumeric;
+
+/**
+ * @brief End of text : lorem ipsum ... EOT.
+ * 
+ */
 DLL_PUBLIC_VAR extern const Rule End;
+
+/**
+ * @brief Beginning of Text : BOT ...lorem ipsum
+ * 
+ */
 DLL_PUBLIC_VAR extern const Rule Beginning;
+
+/**
+ * @brief Not Alphanumeric
+ * 
+ */
 DLL_PUBLIC_VAR extern const Rule Symbol;
+
+/**
+ * @brief 0->9 or A-F 
+ * 
+ */
 DLL_PUBLIC_VAR extern const Rule Hex;
+
+/**
+ * @brief 0->7
+ * 
+ */
 DLL_PUBLIC_VAR extern const Rule Octet;
+
+/**
+ * @brief Beginning of line .....\n 
+ * 
+ */
 DLL_PUBLIC_VAR extern const Rule BeginningOfLine;
+
+/**
+ * @brief CRLF or LF or CR 
+ * 
+ */
 DLL_PUBLIC_VAR extern const Rule EndOfLine;
+
+/**
+ * @brief SPACE or TAB or NEWLINE 
+ * 
+ */
 DLL_PUBLIC_VAR extern const Rule WhiteSpace;
+
+/**
+ * @brief One or more Whitespaces 
+ * 
+ */
 DLL_PUBLIC_VAR extern const Rule WhiteSpaces;
+
+/**
+ * @brief 0 or 1 !! 
+ * 
+ */
 DLL_PUBLIC_VAR extern const Rule Binary;
+/**
+ * @brief last letter in word (word<<)
+ * 
+ */
 DLL_PUBLIC_VAR extern const Rule WordEnd;
+
+/**
+ * @brief first lteer in word (>>word) 
+ * 
+ */
 DLL_PUBLIC_VAR extern const Rule WordStart;
+
+/**
+ * @brief Natural: {1, 2, 3, 4,...} 
+ * 
+ */
 DLL_PUBLIC_VAR extern const Rule Natural;
+
+/**
+ * @brief Integer {..,-2,-1,0,1,2,...} 
+ * 
+ */
 DLL_PUBLIC_VAR extern const Rule Integer;
+
+/**
+ * @brief Rational Number {-2.0,... ,1.0 ,1.5,1.53} 
+ * 
+ */
 DLL_PUBLIC_VAR extern const Rule Rational;
+
+/**
+ * @brief Scenific Number like +2.034e+12
+ * 
+ */
 DLL_PUBLIC_VAR extern const Rule Scientific;
+
+/**
+ * @brief IP v4 Address 11.22.33.44 
+ * 
+ */
 DLL_PUBLIC_VAR extern const Rule IPv4;
+
+/**
+ * @brief To case sensitive
+ * 
+ */
 DLL_PUBLIC_VAR extern const Rule CaseSensitive;
+
+/**
+ * @brief To case insensitive 
+ * 
+ */
 DLL_PUBLIC_VAR extern const Rule CaseInsensitive;
+
+/**
+ * @brief In chain like A..B..C 
+ * 
+ */
 DLL_PUBLIC_VAR extern const Rule InChain;
 
+
+/**
+ * @brief Not in set
+ * 
+ * @tparam __CHARTYPE 
+ * @param set 
+ * @return Rule 
+ */
 template<typename __CHARTYPE>
 Rule Out(const __CHARTYPE* set) {
   return Any & Not(In(set));
 }
 
+/**
+ * @brief skip letters till the rule applies 
+ * 
+ * @param r 
+ * @return DLL_PUBLIC 
+ */
 DLL_PUBLIC Rule SkipTo(const Rule& r);
+
+/**
+ * @brief skip fixed number of letters 
+ * 
+ * @param count 
+ * @return DLL_PUBLIC 
+ */
 DLL_PUBLIC Rule SkipTo(const unsigned long count);
+
+/**
+ * @brief Stop when rule applies ..return false if it does not exist 
+ * 
+ * @param r 
+ * @return DLL_PUBLIC 
+ */
 DLL_PUBLIC Rule Until(const Rule& r);
+
+/**
+ * @brief extract to matach named key 
+ * 
+ * @param r 
+ * @param key 
+ * @return DLL_PUBLIC 
+ */
 DLL_PUBLIC Rule Extract(const Rule& r, const char* key);
+
+/**
+ * @brief extract but unnamed 
+ * 
+ * @param r 
+ * @return DLL_PUBLIC 
+ */
 DLL_PUBLIC Rule Extract(const Rule& r);
+
+/**
+ * @brief extract to matach named key 
+ * 
+ * @param r 
+ * @param key 
+ * @return DLL_PUBLIC 
+ */
 DLL_PUBLIC Rule operator >> (const Rule& r, const char* key);
+
+/**
+ * @brief the rule is enclosed between quote symbol 
+ * 
+ * @param r 
+ * @param quote 
+ * @return DLL_PUBLIC 
+ */
 DLL_PUBLIC Rule Enclosed(const Rule& r, const char* quote);
+
+/**
+ * @brief enclosed between open/close marks 
+ * 
+ * @param r 
+ * @param open 
+ * @param close 
+ * @return DLL_PUBLIC 
+ */
 DLL_PUBLIC Rule Enclosed(const Rule& r, const char* open
                             , const char* close);
+
+/**
+ * @brief Set context variable with name 
+ * 
+ * @param f 
+ * @return DLL_PUBLIC 
+ */
 DLL_PUBLIC Rule Set(const char* f);
+
+/**
+ * @brief set context variable with name and value 
+ * 
+ * @param f 
+ * @param v 
+ * @return DLL_PUBLIC 
+ */
 DLL_PUBLIC Rule Set(const char* f, const char* v);
+
+/**
+ * @brief Delete/unset context variable 
+ * 
+ * @param f 
+ * @return DLL_PUBLIC 
+ */
 DLL_PUBLIC Rule Del(const char* f);
+
+/**
+ * @brief if context variable equals "1" 
+ * 
+ * @param f 
+ * @return DLL_PUBLIC 
+ */
 DLL_PUBLIC Rule If(const char* f);
+
+/**
+ * @brief if context variable equals value 
+ * 
+ * @param f 
+ * @param v 
+ * @return DLL_PUBLIC 
+ */
 DLL_PUBLIC Rule If(const char* f, const char* v);
+
+/**
+ * @brief reference the rule recursively 
+ * 
+ * @param r 
+ * @return DLL_PUBLIC 
+ */
 DLL_PUBLIC Rule Ref(const Rule& r);
+
+/**
+ * @brief if named rule already matched at least once 
+ * 
+ * @param key 
+ * @return DLL_PUBLIC 
+ */
 DLL_PUBLIC Rule IfMatched(const char* key);
+
+/**
+ * @brief if named rule already matched at least number of times
+ * 
+ * @param key 
+ * @param min 
+ * @return DLL_PUBLIC 
+ */
 DLL_PUBLIC Rule IfMatched(const char* key, unsigned long min);
+
+/**
+ * @brief if named rule already matched number of times between
+ *  min and max 
+ * 
+ * @param key 
+ * @param min 
+ * @param max 
+ * @return DLL_PUBLIC 
+ */
 DLL_PUBLIC Rule IfMatched(const char* key
       , unsigned long min
       , unsigned long max);
 }  // namespace Operators
 
-
+/**
+ * @brief The main processor class, it is similar to regex
+ * 
+ * @tparam __CHARTYPE 
+ */
 template <typename __CHARTYPE>
 class Stringozzi {
   typedef basic_string<__CHARTYPE> STRING;
   Core::Rule _rule;
 
  public:
+ /**
+  * @brief Construct a new Stringozzi object
+  * 
+  * @param r 
+  */
   explicit Stringozzi(const Core::Rule& r) : _rule(r) {}
 
+ /**
+ * @brief direct testing the string versus the rule ..
+ *  no search conducted 
+ * 
+ * @param str 
+ * @param flags 
+ * @return true 
+ * @return false 
+ */
   bool Test(const __CHARTYPE* str, unsigned long flags = 0) {
     Core::Context<__CHARTYPE> context(str, flags);
     return _rule.Check(&context);
@@ -1411,12 +2018,29 @@ class Stringozzi {
     return _rule.Check(&context);
   }
 
+  /**
+   * @brief Search the text for the specified rule 
+   * 
+   * @param str 
+   * @param flags 
+   * @return true if found
+   * @return false otherwise
+   */
   bool Search(const __CHARTYPE* str, unsigned long flags = 0) {
     Core::Context<__CHARTYPE> context(str, flags);
     Core::Rule rule = Operators::Until(_rule);
     return rule.Check(&context);
   }
 
+
+  /**
+   * @brief Search the text for the specified rule and return 
+   * string pointer of the first match
+   * 
+   * @param str 
+   * @param flags 
+   * @return const __CHARTYPE* 
+   */
   const __CHARTYPE* SearchAndGetPtr(const __CHARTYPE* str
           , unsigned long flags = 0) {
     Utils::Matches<__CHARTYPE> matches;
@@ -1428,6 +2052,15 @@ class Stringozzi {
       return NULL;
   }
 
+/**
+ * @brief Search the text for the specified rule and return 
+ * index of the first match
+ * 
+ * 
+ * @param str 
+ * @param flags 
+ * @return size_t 
+ */
   size_t SearchAndGetIndex(const __CHARTYPE* str
             , unsigned long flags = 0) {
     Utils::Matches<__CHARTYPE> _matches;
@@ -1439,6 +2072,15 @@ class Stringozzi {
       return -1;
   }
 
+/**
+ * @brief search text for the rule, if found .. it returns all matches  
+ * 
+ * @param str 
+ * @param matches 
+ * @param flags 
+ * @return true 
+ * @return false 
+ */
   bool Match(const __CHARTYPE* str
           , Utils::Matches<__CHARTYPE>& matches
           , unsigned long flags = 0) {
@@ -1454,6 +2096,16 @@ class Stringozzi {
   }
 
 
+/**
+ * @brief Search the text and replace the matched token with 
+ * the specified string
+ * 
+ * @param str 
+ * @param rep 
+ * @param flags 
+ * @param count 
+ * @return STRING 
+ */
   STRING Replace(const __CHARTYPE* str, const __CHARTYPE* rep
     , unsigned long flags = 0
     , unsigned int count = 1 ) {
@@ -1476,6 +2128,16 @@ class Stringozzi {
     return s;
   }
 
+/**
+ * @brief Search the text and replace the matched token with 
+ * the specified string in place
+ * 
+ * @param str 
+ * @param size 
+ * @param rep 
+ * @param count 
+ * @param casesensitive 
+ */
   void Replace(__CHARTYPE* str, unsigned long size
         , const __CHARTYPE* rep
         , unsigned int count = 1
@@ -1484,15 +2146,26 @@ class Stringozzi {
   strncpy(str, ret.c_str(), size);
   }
 
+/**
+ * @brief Split the string base on separator specified in the rule  
+ * 
+ * @param str 
+ * @param vector 
+ * @param flags 
+ * @param dropEmpty 
+ * @param count 
+ * @param caseSensitive 
+ * @return true 
+ * @return false 
+ */
   bool Split(__CHARTYPE* str, vector<STRING>& vector
     , unsigned long flags = 0
     , bool dropEmpty = true
-    , unsigned int count = 1
-    , bool caseSensitive = true) {
+    , unsigned int count = 1) {
     Core::Context<__CHARTYPE> context(str, flags);
     Core::Position last_start = str;
     Core::Rule rule = Operators::Until(_rule);
-    string result;
+    STRING result;
     for (int i = 0; i < count && rule.Check(context); i++) {
       Core::Position start = context.GetPosition();
       _rule.Check(context);

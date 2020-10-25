@@ -1,4 +1,15 @@
-﻿/*
+﻿/**
+ * @file Stringozzi.test.cpp
+ * @author Osama Salem (usamamsalem@yahoo.com)
+ * @brief  Main E2E Tests source file
+ * @version 2.0.0.0
+ * @date 2020-10-25
+ * 
+ * @copyright Copyright (c) 2020
+ * 
+ */
+
+/*
 MIT License
 
 Copyright (c) 2020 Osama Salem
