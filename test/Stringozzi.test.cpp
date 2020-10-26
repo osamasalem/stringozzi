@@ -48,7 +48,6 @@ TEST(Operators, TestSkip) {
   ASSERT_TRUE(Actions::Test(SkipTo(2) > Is("ABBB") > End, "AAABBB"));
   ASSERT_TRUE(Actions::Test(SkipTo(3) > Is("BBB") > End, "AAABBB"));
   ASSERT_FALSE(Actions::Test(SkipTo(10) > End, "AAABBB"));
-
 }
 
 TEST(Operators, TestEnclosed) {
@@ -61,14 +60,12 @@ TEST(Operators, TestEnclosed) {
   ASSERT_FALSE(Actions::Test(Enclosed(Is("ABC"), "#", "$") > End, "#ABC"));
   ASSERT_FALSE(Actions::Test(Enclosed(Is("ABC"), "#", "$") > End, "ABC$"));
   ASSERT_FALSE(Actions::Test(Enclosed(Is("ABC"), "#", "$") > End, "$ABC#"));
-
 }
 
 TEST(Manipulators, TestLookAhead) {
   ASSERT_FALSE(Actions::Test(LookAhead(Is("ABC")) > End, "ABC"));
   ASSERT_TRUE(Actions::Test(LookAhead(Is("ABC")) > Is("ABC") > End, "ABC"));
   ASSERT_FALSE(Actions::Test(LookAhead(Is("ABC")) > Is("DEF") > End, "DEF"));
-
 }
 
 TEST(StateKeepers, TestVars) {
@@ -78,7 +75,6 @@ TEST(StateKeepers, TestVars) {
               If("VAR") > Is('O'), "O"));
   ASSERT_FALSE(Actions::Test(Set("VAR", "2") > If("VAR") > Is('O'), "O"));
   ASSERT_TRUE(Actions::Test(Set("VAR", "2") > If("VAR", "2") > Is('O'), "O"));
-
 }
 
 TEST(StateKeepers, TestCaseModifier) {
@@ -117,7 +113,7 @@ TEST(Utils, TestFlags) {
   ASSERT_FALSE(f.IsFlagSet(0x1));
   ASSERT_TRUE(f.IsFlagSet(0x2));
   ASSERT_TRUE(f.IsFlagSet(0x4));
-  
+
   f.SetAllFlags(0x1);
   ASSERT_TRUE(f.IsFlagSet(0x1));
   ASSERT_FALSE(f.IsFlagSet(0x2));
@@ -142,8 +138,6 @@ TEST(Utils, TestFlags) {
   ASSERT_TRUE(f.IsFlagSet(0x1));
   ASSERT_FALSE(f.IsFlagSet(0x2));
   ASSERT_FALSE(f.IsFlagSet(0x4));
-
-
 }
 
 
@@ -155,7 +149,6 @@ TEST(Utils, TestUTF8ToUTF32) {
   ASSERT_EQ(Utils::UTF8ToUTF32("\xED\x95\x9C"), 0xD55C);
   ASSERT_EQ(Utils::UTF8ToUTF32("\xF0\x90\x8D\x88"), 0x10348);
   ASSERT_EQ(Utils::UTF8ToUTF32(""), 0);
-
 }
 
 TEST(Utils, TestUTF8ToUTF32Length) {
@@ -166,7 +159,6 @@ TEST(Utils, TestUTF8ToUTF32Length) {
   ASSERT_EQ(Utils::UTF8ToUTF32Length("\xED\x95\x9C"), 3);
   ASSERT_EQ(Utils::UTF8ToUTF32Length("\xF0\x90\x8D\x88"), 4);
   ASSERT_EQ(Utils::UTF8ToUTF32Length(""), 1);
-
 }
 
 #ifdef CX11_SUPPORTED
@@ -179,7 +171,6 @@ TEST(Utils, TestUTF16ToUTF32) {
   ASSERT_EQ(Utils::UTF16ToUTF32(u"한"), 0xD55C);
   ASSERT_EQ(Utils::UTF16ToUTF32(u"𐍈"), 0x10348);
   ASSERT_EQ(Utils::UTF16ToUTF32(u""), 0);
-
 }
 
 TEST(Utils, TestUTF16ToUTF32Length) {
@@ -190,7 +181,6 @@ TEST(Utils, TestUTF16ToUTF32Length) {
   ASSERT_EQ(Utils::UTF16ToUTF32Length(u"한"), 1);
   ASSERT_EQ(Utils::UTF16ToUTF32Length(u"𐍈"), 2);
   ASSERT_EQ(Utils::UTF16ToUTF32Length(u""), 1);
-
 }
 #endif
 
@@ -211,11 +201,14 @@ TEST(Operators, TestSymbol) {
 }
 
 TEST(Manipulators, TestLookBack) {
-  ASSERT_STREQ(StringozziA(Is("aaa") > (Is(':') & LookBack(Is("aaa")))).SearchAndGetPtr("aaa:ccc bbb dddd"), "aaa:ccc bbb dddd");
-  ASSERT_STREQ(StringozziA((Is(':') & LookBack(Is("aaa")))).SearchAndGetPtr("aaa:ccc bbb dddd"), ":ccc bbb dddd");
-  ASSERT_STREQ(StringozziA((Is(':') & LookBack(Is("qqq")))).SearchAndGetPtr("aaa:ccc bbb dddd"), NULL);
-  ASSERT_STREQ(StringozziA((Is('a') & LookBack(Is("aa")))).SearchAndGetPtr("aaa:ccc bbb dddd"), "a:ccc bbb dddd");
-
+  ASSERT_STREQ(StringozziA(Is("aaa") > (Is(':') & LookBack(Is("aaa"))))
+          .SearchAndGetPtr("aaa:ccc bbb dddd"), "aaa:ccc bbb dddd");
+  ASSERT_STREQ(StringozziA((Is(':') & LookBack(Is("aaa"))))
+          .SearchAndGetPtr("aaa:ccc bbb dddd"), ":ccc bbb dddd");
+  ASSERT_STREQ(StringozziA((Is(':') & LookBack(Is("qqq"))))
+          .SearchAndGetPtr("aaa:ccc bbb dddd"), NULL);
+  ASSERT_STREQ(StringozziA((Is('a') & LookBack(Is("aa"))))
+          .SearchAndGetPtr("aaa:ccc bbb dddd"), "a:ccc bbb dddd");
 }
 
 TEST(Manipulators, TestRecursiveByRef) {
@@ -285,7 +278,6 @@ TEST(Manipulators, TestifMatched) {
             | (Is('S') >> "S"))) > End >
             (IfMatched("O", 3) & IfMatched("S", 1)))
             .Match("OOOS", m, SPEG_CASEINSENSITIVE | SPEG_IGNORESPACES));
-
 }
 
 TEST(Manipulators, TestExtract) {
@@ -304,7 +296,6 @@ TEST(Manipulators, TestExtract) {
   ASSERT_STREQ(m.Get("S", 0), "S");
   ASSERT_STREQ(m.Get("S", 1), NULL);
   ASSERT_STREQ(m.Get("X", 1), NULL);
-
 }
 
 
@@ -347,7 +338,6 @@ TEST(Manipulators, TestSequence) {
   ASSERT_FALSE(StringozziA(Is('S') > Is('O')).Test("SK"));
   ASSERT_TRUE(StringozziA(Is('S') > Is('O')).Test("SO"));
   ASSERT_FALSE(StringozziA(Is('S') > Is('O') > End).Test("SOO"));
-
 }
 
 TEST(Manipulators, TestZeroOrMore) {
@@ -356,7 +346,6 @@ TEST(Manipulators, TestZeroOrMore) {
   ASSERT_FALSE(StringozziA(ZeroOrMore(Is('L')) > End).Test("LLLLKKK"));
   ASSERT_TRUE(StringozziA(ZeroOrMore(Is('L'), 5) > End).Test("LLLL"));
   ASSERT_FALSE(StringozziA(ZeroOrMore(Is('L'), 2) > End).Test("LLLLKKK"));
-
 }
 
 TEST(Manipulators, TestOneOrMore) {
@@ -370,7 +359,6 @@ TEST(Manipulators, TestOneOrMore) {
   ASSERT_FALSE(StringozziA(+Is("ABC") > End).Test("ABCABCAB"));
   ASSERT_FALSE(StringozziA(+Is("ABC") > End).Test("ABCABABC"));
   ASSERT_TRUE(StringozziA(+Is("ABC")).Test("ABCABCAB"));
-
 }
 
 /*
@@ -404,7 +392,6 @@ TEST(Manipulators, TestUntil) {
 
 
 TEST(Manipulators, TestTimes) {
-
   ASSERT_FALSE(StringozziA(1 * WhiteSpace > Is("Text") > End).Test(""));
   ASSERT_TRUE(StringozziA(0 * WhiteSpace > Is("Text") > End).Test("Text"));
   ASSERT_TRUE(StringozziA(6 * WhiteSpace > Is("Text") > End)
@@ -420,12 +407,9 @@ TEST(Manipulators, TestTimes) {
   ASSERT_TRUE(StringozziA(Range(1, 3) * Is("A") > End).Test("AAA"));
   ASSERT_TRUE(StringozziA(Is("A") * Range(1, 3) > End).Test("AAA"));
   ASSERT_FALSE(StringozziA(Range(1, 3) * Is("A") > End).Test("AAAA"));
-
-
 }
 
-TEST(Actions, TestReplace)
-{
+TEST(Actions, TestReplace) {
   ASSERT_STREQ(StringozziA(Is("Osama"))
             .Replace("1234567Osamadddd", "l").c_str(), "1234567ldddd");
   ASSERT_STREQ(StringozziA(Is("Osama"))
@@ -447,8 +431,7 @@ TEST(Actions, TestReplace)
             , "1234567Osamloldddd");
 }
 
-TEST(Actions, TestSearch)
-{
+TEST(Actions, TestSearch) {
   const char* str = "osaama";
   str = Actions::SearchAndGetPtr(Is('a'), str);
   ASSERT_STRCASEEQ(str, "aama");
@@ -473,11 +456,9 @@ TEST(Manipulators, TestZeroOrOne) {
               > End, "AKC"));
   ASSERT_TRUE(Actions::Test((~Is('B')) > End, "B"));
   ASSERT_TRUE(Actions::Test((~Is('B')) > End, ""));
-
 }
 
-TEST(Primitives, TestIn)
-{
+TEST(Primitives, TestIn) {
   ASSERT_TRUE(Actions::Test(In("ABC"), "A"));
   ASSERT_TRUE(Actions::Test(In("ABC"), "B"));
   ASSERT_TRUE(Actions::Test(In("ABC"), "C"));
@@ -488,8 +469,7 @@ TEST(Primitives, TestIn)
   ASSERT_FALSE(Actions::Test(In(""), "A"));
 }
 
-TEST(Primitives, TestAny)
-{
+TEST(Primitives, TestAny) {
   ASSERT_TRUE(Actions::Test(Any, "A"));
   ASSERT_TRUE(Actions::Test(Any, "a"));
   ASSERT_TRUE(Actions::Test(Any, "1"));
@@ -499,10 +479,8 @@ TEST(Primitives, TestAny)
 }
 
 
-int main(int argc, char** argv)
-{
+int main(int argc, char** argv) {
   ::testing::InitGoogleTest(&argc, argv);
   return  RUN_ALL_TESTS();
-
 }
 

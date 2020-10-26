@@ -977,15 +977,9 @@ class BetweenValidator : public Core::NormalValidator {
     : _min(min)
     , _max(max) {}
 
-  // TODO(osamamsalem) : the character operations and conversion
-  // should be revised
   explicit BetweenValidator(const __CHARTYPE* range)
-    : _min(0)
-    , _max(0) {
-    _min = Utils::GetChar(range);
-    Utils::Increment(&range);
-    _max = Utils::GetChar(range);
-  }
+    : _min(range[0])
+    , _max(range[1]) { }
 
   virtual bool Check(Core::ContextInterface* context) const {
     context->AdjustPosition();
@@ -1018,6 +1012,7 @@ typedef BetweenValidator<char32_t>  BetweenValidatorU32;
 template<typename __T>
 class ExactValidator : public Core::NormalValidator {
   const __T* _phrase;
+
  public:
  /**
   * @brief Construct a new Exact Validator object
@@ -1399,7 +1394,7 @@ using namespace Core;
 /** 
  * @brief A then B 
  */
-DLL_PUBLIC Rule Sequence(const Rule& first, const Rule& second); 
+DLL_PUBLIC Rule Sequence(const Rule& first, const Rule& second);
 /**
  * @brief A then B 
  * 
@@ -1407,7 +1402,7 @@ DLL_PUBLIC Rule Sequence(const Rule& first, const Rule& second);
  * @param second 
  * @return DLL_PUBLIC 
  */
-DLL_PUBLIC Rule operator > (const Rule& first, const Rule& second); 
+DLL_PUBLIC Rule operator > (const Rule& first, const Rule& second);
 /**
  * @brief A and B
  * 
@@ -1543,7 +1538,7 @@ DLL_PUBLIC Rule OneOrMore(const Rule& rule, const unsigned int num);
  * @return DLL_PUBLIC 
  */
 DLL_PUBLIC Rule OneOrMore(const Rule& rule);
-s
+
 /**
  * @brief (1->num) times of A 
  * 
@@ -2200,6 +2195,10 @@ typedef Stringozzi<char32_t> StringozziU32;
 
 
 namespace Utils {
+/**
+ * @brief placehoder object to inject rule into recursive rule
+ * 
+ */
 class PlaceHolder {
   Manipulators::RefValidator* _ref;
 
@@ -2217,34 +2216,86 @@ class PlaceHolder {
 }  // namespace Utils
 
 namespace Operators {
-  DLL_PUBLIC Core::Rule Ref(Utils::PlaceHolder &  ph);
+  DLL_PUBLIC Core::Rule Ref(Utils::PlaceHolder& ph);
 }
-
+/**
+ * @brief Direct parsing actions functions
+ * 
+ */
 namespace Actions {
+  /**
+   * @brief Proxy to Stringozzi.Test
+   * 
+   * @tparam __CHARTYPE 
+   * @param rule 
+   * @param text 
+   * @param flags 
+   * @return true 
+   * @return false 
+   */
 template<typename __CHARTYPE>
 bool Test(const Core::Rule& rule, const __CHARTYPE* text
             , unsigned long flags = 0) {
   return Stringozzi<__CHARTYPE>(rule).Test(text, flags);
 }
 
+/**
+ * @brief Proxy to Stringozzi.FastMatch
+ * 
+ * @tparam __CHARTYPE 
+ * @param rule 
+ * @param str 
+ * @param flags 
+ * @return true 
+ * @return false 
+ */
 template<typename __CHARTYPE>
 bool FastMatch(const Core::Rule& rule, const __CHARTYPE* str
             , unsigned long flags = 0) {
   return Stringozzi<__CHARTYPE>(rule).FastMatch(str, flags);
 }
 
+/**
+ * @brief Proxy to Stringozzi.Search
+ * 
+ * @tparam __CHARTYPE 
+ * @param rule 
+ * @param str 
+ * @param flags 
+ * @return true 
+ * @return false 
+ */
 template<typename __CHARTYPE>
 bool Search(const Core::Rule& rule, const __CHARTYPE* str
             , unsigned long flags = 0) {
   return Stringozzi<__CHARTYPE>(rule).Search(str, flags);
 }
 
+
+/**
+ * @brief Proxy to StringozziA::SearchAndGetPtr
+ * 
+ * @tparam __CHARTYPE 
+ * @param _rule 
+ * @param str 
+ * @param flags 
+ * @return const __CHARTYPE* 
+ */
 template<typename __CHARTYPE>
 const __CHARTYPE* SearchAndGetPtr(const Core::Rule& _rule
             , const __CHARTYPE* str, unsigned long flags = 0) {
   return Stringozzi<__CHARTYPE>(_rule).SearchAndGetPtr(str, flags);
 }
 
+/**
+ * @brief Proxy to Stringozzi:: SearchAndGetIndex
+ * 
+ * @tparam __CHARTYPE 
+ * @param _rule 
+ * @param str 
+ * @param flags 
+ * @return size_t 
+ */
 template<typename __CHARTYPE>
 size_t SearchAndGetIndex(const Core::Rule& _rule
             , const __CHARTYPE* str, unsigned long flags = 0) {
@@ -2273,6 +2324,7 @@ bool Split(const Core::Rule& _rule, __CHARTYPE* str
   , unsigned int count = 1) {
   return Stringozzi<__CHARTYPE>(_rule).Split(str, vec, flags, dropEmpty, count);
 }
+
 }  // namespace Actions
 }  // namespace SPEG
 
