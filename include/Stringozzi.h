@@ -1794,6 +1794,18 @@ DLL_PUBLIC_VAR extern const Rule Scientific;
 DLL_PUBLIC_VAR extern const Rule IPv4;
 
 /**
+ * @brief IP v6 Address  
+ * 
+ */
+DLL_PUBLIC_VAR extern const Rule IPv6;
+
+/**
+ * @brief Server host
+ * 
+ */
+DLL_PUBLIC_VAR extern const Rule Host;
+
+/**
  * @brief To case sensitive
  * 
  */

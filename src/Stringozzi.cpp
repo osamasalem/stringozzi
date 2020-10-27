@@ -570,13 +570,47 @@ DLL_PUBLIC_VAR const Rule Scientific = Rational
 
 DLL_PUBLIC_VAR const Rule InChain = new Primitives::InChainValidator();
 
-DLL_PUBLIC_VAR const Rule DecOctet = (Is("25") > Between("05"))|
+const Rule DecOctet = (Is("25") > Between("05"))|
                       (Is('2') > Between("04") > Digit) |
                       (Is('1') > (2 * Digit)) |
                       (Between("19") > Digit) |
                       Digit;
 
 DLL_PUBLIC_VAR const Rule IPv4 = DecOctet > ((Is('.') > DecOctet) * 3);
+
+const Rule h16 = Utils::Range(1, 4) * Hex;
+
+const Rule COLON = Is(':');
+
+const Rule DBLCOLON = Is("::");
+
+const Rule h16Colon = h16 > COLON;
+
+const Rule ls32 = (h16Colon > h16) | IPv4;
+
+
+DLL_PUBLIC_VAR const Rule IPv6 =                              ((6 * (h16Colon)) > ls32)
+                 || (                            DBLCOLON > (5 * (h16Colon)) > ls32)
+                 || (~h16                      > DBLCOLON > (4 * (h16Colon)) > ls32)
+                 || (~((1 * (h16Colon)) > h16) > DBLCOLON >	   (3 * (h16Colon)) > ls32)
+                 || (~((2 * (h16Colon)) > h16) > DBLCOLON >    (2 * (h16Colon)) > ls32)
+                 || (~((3 * (h16Colon)) > h16) > DBLCOLON >    (1 * (h16Colon)) > ls32)
+                 || (~((4 * (h16Colon)) > h16) > DBLCOLON                       > ls32)
+                 || (~((5 * (h16Colon)) > h16) > DBLCOLON > h16)
+                 || (~((6 * (h16Colon)) > h16) > DBLCOLON)
+				 ;
+
+
+
+
+
+const Rule Host = (+((Is('%') > Hex > Hex)
+				     | Alphanumeric
+					 | In("-_.~!$&'()*+,;="))) 
+				  || IPv4 
+				  || IPv6;
+
+
 
 DLL_PUBLIC Rule SkipTo(const Rule &rule) {
   return ZeroOrMore(Any & Not(rule));

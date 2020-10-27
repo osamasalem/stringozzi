@@ -313,12 +313,25 @@ TEST(Utils, TestIPv4) {
   ASSERT_TRUE(StringozziA(IPv4).Test("172.76.22.67"));
 }
 
+TEST(Utils, TestIPv6) {
+  ASSERT_FALSE(StringozziA(IPv6 > End).Test(""));
+  ASSERT_FALSE(StringozziA(IPv6 > End).Test("111111"));
+  ASSERT_FALSE(StringozziA(IPv6 > End).Test("aaaaaaa"));
+  ASSERT_TRUE(StringozziA(IPv6 > End).Test("2001:db8:3:4:f2::192.0.2.33"));
+  ASSERT_TRUE(StringozziA(IPv6 > End).Test("::1"));
+  ASSERT_TRUE(StringozziA(IPv6 > End).Test("::ffff:192.0.2.128"));
+  ASSERT_TRUE(StringozziA(IPv6 > End).Test("::ffff:c000:280"));
+  ASSERT_FALSE(StringozziA(IPv6 > End).Test(":ffff:c000:280"));
+  ASSERT_TRUE(StringozziA(IPv6 > End).Test("0:0:0:0:0:FFFF:129.144.52.38"));
+  ASSERT_TRUE(StringozziA(IPv6 > End).Test("::FFFF:129.144.52.38"));
+}
+
 
 TEST(Manipulators, TestOr) {
-  ASSERT_FALSE(StringozziA(Is('S') | Is('O')).Test(""));
-  ASSERT_FALSE(StringozziA(Is('S') | Is('O')).Test("K"));
-  ASSERT_TRUE(StringozziA(Is('S') | Is('O')).Test("O"));
-  ASSERT_TRUE(StringozziA(Is('S') | Is('O')).Test("S"));
+  ASSERT_FALSE(StringozziA(Is('S')  | Is('O')).Test(""));
+  ASSERT_FALSE(StringozziA(Is('S')  | Is('O')).Test("K"));
+  ASSERT_TRUE(StringozziA(Is('S')   | Is('O')).Test("O"));
+  ASSERT_TRUE(StringozziA(Is('S')   | Is('O')).Test("S"));
   ASSERT_FALSE(StringozziA((Is('V') | Is("Via")) > End).Test("Via"));
   ASSERT_TRUE(StringozziA((Is("Via") | Is('V')) > End).Test("Via"));
 }
@@ -361,25 +374,24 @@ TEST(Manipulators, TestOneOrMore) {
   ASSERT_TRUE(StringozziA(+Is("ABC")).Test("ABCABCAB"));
 }
 
-/*
-TEST(Utils, TestHost)
-{
-  ASSERT_FALSE(StringProcessor("").Parse(HOST + EOT));
-  ASSERT_TRUE (StringProcessor("osama").Parse(HOST + EOT));
-  ASSERT_TRUE (StringProcessor("osama.net").Parse(HOST + EOT));
-  ASSERT_FALSE(StringProcessor(".dddddd").Parse(HOST + EOT));
-  ASSERT_FALSE(StringProcessor("-jfkjdfdk").Parse(HOST + EOT));
-  ASSERT_TRUE (StringProcessor("a-jfkjdfdk").Parse(HOST + EOT));
-  ASSERT_FALSE(StringProcessor("a--jfkjdfdk").Parse(HOST + EOT));
-  ASSERT_TRUE (StringProcessor("www.google.com").Parse(HOST + EOT));
-  ASSERT_TRUE (StringProcessor("111.222.111.222").Parse(HOST + EOT));
 
-  ASSERT_FALSE(StringozziA(HostName > End).Test("ABCABABC"));
+TEST(Operators, TestHost)
+{
+  ASSERT_FALSE(StringozziA(Host > End).Test(""));
+  ASSERT_TRUE (StringozziA(Host > End).Test("osama"));
+  ASSERT_TRUE (StringozziA(Host > End).Test("osama.net"));
+  ASSERT_TRUE(StringozziA(Host > End).Test(".dddddd"));
+  ASSERT_TRUE(StringozziA(Host > End).Test("-jfkjdfdk"));
+  ASSERT_TRUE (StringozziA(Host > End).Test("a-jfkjdfdk"));
+  ASSERT_TRUE(StringozziA(Host > End).Test("a--jfkjdfdk"));
+  ASSERT_TRUE (StringozziA(Host > End).Test("www.google.com"));
+  ASSERT_TRUE (StringozziA(Host > End).Test("111.222.111.222"));
+  ASSERT_TRUE(StringozziA(Host > End).Test("ABCABABC"));
 
 
 
 }
-*/
+
 
 TEST(Manipulators, TestUntil) {
   ASSERT_TRUE(StringozziA(Until(End)).Test(""));
