@@ -707,9 +707,8 @@ class Context : public ContextInterface {
 
   inline void AddMatch(Position start) {
     if (_flags.IsFlagSet(SPEG_MATCHUNNAMED)) {
-      Core::Position end = GetPosition();
       if (end > start) {
-        _matches.Add(MATCHES_TOKEN, start, end);
+        _matches.Add(MATCHES_TOKEN, start, GetPosition());
       }
     }
   }

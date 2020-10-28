@@ -598,17 +598,17 @@ DLL_PUBLIC_VAR const Rule IPv6 =                              ((6 * (h16Colon)) 
                  || (~((4 * (h16Colon)) > h16) > DBLCOLON                       > ls32)
                  || (~((5 * (h16Colon)) > h16) > DBLCOLON > h16)
                  || (~((6 * (h16Colon)) > h16) > DBLCOLON)
-				 ;
+         ;
 
 
 
 
 
 const Rule Host = (+((Is('%') > Hex > Hex)
-				     | Alphanumeric
-					 | In("-_.~!$&'()*+,;="))) 
-				  || IPv4 
-				  || IPv6;
+          | Alphanumeric
+          | In("-_.~!$&'()*+,;="))) 
+          || IPv4 
+          || IPv6;
 
 
 
