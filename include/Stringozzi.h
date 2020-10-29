@@ -142,6 +142,12 @@ typedef char char8_t;
 #define NORMALIZE(__X) ( ((__X) > 0)?(1):( ( (__X) < 0) ?(-1):0))
 #define MATCHES_TOKEN "<MATCHES>"
 
+#define RETURN_FALSE_IF_NULL(__X) if(!__X) return false
+#define RETURN_VOID_IF_NULL(__X) if(!__X) return
+#define RETURN_IF_NULL(__X,__Y) if(!__X) return (__Y)
+#define ADJUST_NULL_STR(__X) if(!__X) __X = "\0\0\0\0"
+
+
 /**
  * @brief The main namespace for Stringozzi
  * 
@@ -270,6 +276,7 @@ DLL_PUBLIC void SafeIncrement(unsigned long* pnum);
  * @param pnum a pointer to double word string  
  */
 DLL_PUBLIC void SafeDecrement(unsigned long* pnum);
+
 
 /**
  * @brief The data structure that hold matches result
@@ -707,7 +714,7 @@ class Context : public ContextInterface {
 
   inline void AddMatch(Position start) {
     if (_flags.IsFlagSet(SPEG_MATCHUNNAMED)) {
-      if (end > start) {
+      if (GetPosition() > start) {
         _matches.Add(MATCHES_TOKEN, start, GetPosition());
       }
     }
@@ -1616,6 +1623,7 @@ Rule Between(const __CHARTYPE* range) {
  */
 template<typename __CHARTYPE>
 Rule In(const __CHARTYPE* set) {
+  ADJUST_NULL_STR(set);
   return new Primitives::InValidator<__CHARTYPE>(set);
 }
 
@@ -1629,6 +1637,7 @@ Rule In(const __CHARTYPE* set) {
  */
 template<typename __CHARTYPE>
 Rule Is(const __CHARTYPE* phrase) {
+  ADJUST_NULL_STR(phrase);
   return new Primitives::ExactValidator<__CHARTYPE>(phrase);
 }
 
@@ -2014,11 +2023,14 @@ class Stringozzi {
  * @return false 
  */
   bool Test(const __CHARTYPE* str, unsigned long flags = 0) {
+    RETURN_FALSE_IF_NULL(str);
+
     Core::Context<__CHARTYPE> context(str, flags);
     return _rule.Check(&context);
   }
 
   bool FastMatch(const __CHARTYPE* str, unsigned long flags = 0) {
+    RETURN_FALSE_IF_NULL(str);
     Utils::Matches<__CHARTYPE> _matches;
     Core::Context<__CHARTYPE> context(str, flags, &_matches);
     return _rule.Check(&context);
@@ -2033,6 +2045,7 @@ class Stringozzi {
    * @return false otherwise
    */
   bool Search(const __CHARTYPE* str, unsigned long flags = 0) {
+    RETURN_FALSE_IF_NULL(str);
     Core::Context<__CHARTYPE> context(str, flags);
     Core::Rule rule = Operators::Until(_rule);
     return rule.Check(&context);
@@ -2049,6 +2062,7 @@ class Stringozzi {
    */
   const __CHARTYPE* SearchAndGetPtr(const __CHARTYPE* str
           , unsigned long flags = 0) {
+    RETURN_IF_NULL(str, NULL);
     Utils::Matches<__CHARTYPE> matches;
     Core::Context<__CHARTYPE> context(str, flags);
     Core::Rule r = Operators::Until(_rule);
@@ -2069,6 +2083,7 @@ class Stringozzi {
  */
   size_t SearchAndGetIndex(const __CHARTYPE* str
             , unsigned long flags = 0) {
+    RETURN_IF_NULL(str, -1);
     Utils::Matches<__CHARTYPE> _matches;
     const Core::Context<__CHARTYPE> context(str, flags, &_matches);
     Core::Rule r = Operators::Until(_rule);
@@ -2090,11 +2105,11 @@ class Stringozzi {
   bool Match(const __CHARTYPE* str
           , Utils::Matches<__CHARTYPE>& matches
           , unsigned long flags = 0) {
+    RETURN_FALSE_IF_NULL(str);
     flags = flags | SPEG_MATCHNAMED | SPEG_MATCHUNNAMED;
     const __CHARTYPE* ptr = SearchAndGetPtr(str, flags);
-    if (!ptr)
-      return false;
 
+	RETURN_FALSE_IF_NULL(ptr);
     Core::Context<__CHARTYPE> context(ptr, flags);
     bool ret =  _rule.Check(&context);
     matches = context.Matches();
@@ -2115,6 +2130,9 @@ class Stringozzi {
   STRING Replace(const __CHARTYPE* str, const __CHARTYPE* rep
     , unsigned long flags = 0
     , unsigned int count = 1 ) {
+    RETURN_IF_NULL(str,"\0\0\0\0");
+    RETURN_IF_NULL(rep,"\0\0\0\0");
+    
     Core::Context<__CHARTYPE> context(str, flags);
     Core::Position last_start = str;
     Core::Rule r = Operators::Until(_rule);
@@ -2148,6 +2166,8 @@ class Stringozzi {
         , const __CHARTYPE* rep
         , unsigned int count = 1
         , bool casesensitive = true) {
+  RETURN_VOID_IF_NULL(str);
+  RETURN_VOID_IF_NULL(rep);
   STRING ret = Replace(str, rep, count, casesensitive);
   strncpy(str, ret.c_str(), size);
   }
@@ -2168,6 +2188,9 @@ class Stringozzi {
     , unsigned long flags = 0
     , bool dropEmpty = true
     , unsigned int count = 1) {
+    
+    RETURN_FALSE_IF_NULL(str);
+
     Core::Context<__CHARTYPE> context(str, flags);
     Core::Position last_start = str;
     Core::Rule rule = Operators::Until(_rule);
@@ -2190,6 +2213,7 @@ class Stringozzi {
 
   vector<STRING> Split(__CHARTYPE* str) {
     vector<string> vec;
+    RETURN_IF_NULL(str, vec);
     SplitAll(str, vec);
     return vec;
   }

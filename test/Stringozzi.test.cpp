@@ -42,6 +42,23 @@ using namespace SPEG::Utils;
 using namespace SPEG::Operators;
 using namespace SPEG::Actions;
 
+TEST(Operators, TestIs) {
+  ASSERT_TRUE (Actions::Test(Is("TEST") > End , "TEST"));
+  ASSERT_FALSE(Actions::Test(Is(NULL) > End , "TEST"));
+  ASSERT_FALSE(Actions::Test(Is<char>(NULL) > End , "TEST"));
+  ASSERT_FALSE(Actions::Test(Is("KKKK") > End , "TEST"));
+  ASSERT_FALSE(Actions::Test(Is("Test") > End , "TEST"));
+  ASSERT_TRUE(Actions::Test(Is("Test") > End , "TEST",SPEG_CASEINSENSITIVE));
+}
+
+TEST(Operators, TestIn) {
+  ASSERT_TRUE (Actions::Test(+In("XYZ") > End , "ZXYZ"));
+  ASSERT_FALSE(Actions::Test(+In<char>(NULL) > End , "ZXYZ"));
+  ASSERT_FALSE(Actions::Test(+In("XYZ") > End , "TEST"));
+  ASSERT_FALSE(Actions::Test(+In("XYZ") > End , "zxyz"));
+  ASSERT_TRUE (Actions::Test(+In("XYZ") > End , "zxyz" , SPEG_CASEINSENSITIVE));
+}
+
 TEST(Operators, TestSkip) {
   ASSERT_TRUE(Actions::Test(SkipTo(Is("B")) > Is("BBB") > End, "AAABBB"));
   ASSERT_TRUE(Actions::Test(SkipTo(Is("B")) > End, "AAA"));
@@ -375,8 +392,8 @@ TEST(Manipulators, TestOneOrMore) {
 }
 
 
-TEST(Operators, TestHost)
-{
+TEST(Operators, TestHost) {
+  ASSERT_FALSE(StringozziA(Host > End).Test(NULL));
   ASSERT_FALSE(StringozziA(Host > End).Test(""));
   ASSERT_TRUE (StringozziA(Host > End).Test("osama"));
   ASSERT_TRUE (StringozziA(Host > End).Test("osama.net"));
@@ -387,9 +404,6 @@ TEST(Operators, TestHost)
   ASSERT_TRUE (StringozziA(Host > End).Test("www.google.com"));
   ASSERT_TRUE (StringozziA(Host > End).Test("111.222.111.222"));
   ASSERT_TRUE(StringozziA(Host > End).Test("ABCABABC"));
-
-
-
 }
 
 
@@ -422,6 +436,11 @@ TEST(Manipulators, TestTimes) {
 }
 
 TEST(Actions, TestReplace) {
+  ASSERT_STREQ(StringozziA(Is("Osama"))
+            .Replace(NULL, "l").c_str(), "");
+  ASSERT_STREQ(StringozziA(Is("Osama"))
+            .Replace("1234567Osamadddd", NULL).c_str(), "");
+
   ASSERT_STREQ(StringozziA(Is("Osama"))
             .Replace("1234567Osamadddd", "l").c_str(), "1234567ldddd");
   ASSERT_STREQ(StringozziA(Is("Osama"))

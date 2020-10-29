@@ -26,19 +26,19 @@ SET( CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG 	${CMAKE_CURRENT_LIST_DIR}/bin_${CMAKE
 #********************************************************
 # Stringozzi
 #********************************************************
-ADD_LIBRARY( stringozzi-static-x86			src/Stringozzi.cpp )
-SET_TARGET_PROPERTIES(stringozzi-static-x86 
+ADD_LIBRARY( stringozzi-static			src/Stringozzi.cpp )
+SET_TARGET_PROPERTIES(stringozzi-static 
         PROPERTIES
         CMAKE_BUILD_TYPE    Release
-        OUTPUT_NAME         "libstringozzi-static-x86"
+        OUTPUT_NAME         "libstringozzi-static"
 )
 
 
-ADD_LIBRARY( stringozzi-shared-x86 SHARED		src/Stringozzi.cpp )
-SET_TARGET_PROPERTIES(stringozzi-shared-x86 
+ADD_LIBRARY( stringozzi-shared SHARED		src/Stringozzi.cpp )
+SET_TARGET_PROPERTIES(stringozzi-shared 
         PROPERTIES
         CMAKE_BUILD_TYPE    Release
-        OUTPUT_NAME         "libstringozzis-shared-x86"
+        OUTPUT_NAME         "libstringozzis-shared"
 )
 
 

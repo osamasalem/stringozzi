@@ -625,6 +625,7 @@ DLL_PUBLIC Rule Until(const Rule &rule) {
 }
 
 DLL_PUBLIC Rule Extract(const Rule &rule, const char *key) {
+  ADJUST_NULL_STR(key);
   return new Manipulators::ExtractValidator(rule.Get(), key);
 }
 
@@ -637,12 +638,16 @@ DLL_PUBLIC Rule operator>>(const Rule &rule, const char *key) {
 }
 
 DLL_PUBLIC Rule Enclosed(const Rule &rule, const char *quote) {
+  ADJUST_NULL_STR(quote);  
   Rule quoteRule = Is(quote);
   return quoteRule  > rule > quoteRule;
 }
 
 DLL_PUBLIC Rule Enclosed(const Rule &r, const char *open
                             , const char *close) {
+  ADJUST_NULL_STR(open);
+  ADJUST_NULL_STR(close);
+                 
   return Is(open) > r > Is(close);
 }
 
@@ -652,22 +657,29 @@ DLL_PUBLIC_VAR const Rule CaseInsensitive =
             new StateKeepers::CaseModifier(true);
 
 DLL_PUBLIC Rule Set(const char *f) {
+  RETURN_IF_NULL(f, Rule());
   return new StateKeepers::SetFlagModifier(f);
 }
 
 DLL_PUBLIC Rule Set(const char *f, const char *v) {
+  RETURN_IF_NULL(f, Rule());
+  RETURN_IF_NULL(v, Rule());
   return new StateKeepers::SetFlagModifier(f, v);
 }
 
 DLL_PUBLIC Rule Del(const char *f) {
+  RETURN_IF_NULL(f, Rule());
   return new StateKeepers::DelFlagModifier(f);
 }
 
 DLL_PUBLIC Rule If(const char *f) {
+  RETURN_IF_NULL(f, Rule());
   return new StateKeepers::IfValidator(f);
 }
 
 DLL_PUBLIC Rule If(const char *f, const char *v) {
+  RETURN_IF_NULL(f, Rule());
+  RETURN_IF_NULL(v, Rule());
   return new StateKeepers::IfValidator(f, v);
 }
 
@@ -682,15 +694,18 @@ DLL_PUBLIC Rule Ref(Utils::PlaceHolder& ph) {
 }
 
 DLL_PUBLIC Rule IfMatched(const char* key) {
+  RETURN_IF_NULL(key, Rule());
   return new StateKeepers::IfMatchedValidator(key, 1, -1);
 }
 
 DLL_PUBLIC Rule IfMatched(const char* key, unsigned long min) {
+  RETURN_IF_NULL(key, Rule());
   return new StateKeepers::IfMatchedValidator(key, min, -1);
 }
 
 DLL_PUBLIC Rule IfMatched(const char* key, unsigned long min
                             , unsigned long max) {
+  RETURN_IF_NULL(key, Rule());
   return new StateKeepers::IfMatchedValidator(key, min, max);
 }
 

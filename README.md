@@ -116,7 +116,9 @@ int main(int argc, char** argv)
 | CaseSensitive | this will set case insensitive mode in parsing process |
 | SetVar(varname,_[value]_) | this will  match all the time .. this sets a flag/variable with specified value.. if no value is supplied the default will be ```1``` |
 | DelVar(varname) | this will match always .. this is remove flag/variable  |
-| ifVar() | checks if the sored named var equals the specified value | 
+| If(_varname_,[_value_]) | checks if the sored named var equals the specified value.. if no value speicified the default value will be ```1``` |
+
+
 
 ## Flags definition
 | Flag | Description |
@@ -127,7 +129,92 @@ int main(int argc, char** argv)
 | SPEG_IGNORESPACES	| Will match all successive tokens whether there are spaces between them or not, ```Whitespace``` match pattern will not work here in this mode | 
 
 
-## Use Cases
+## Guides and Use Cases
+### Use structured Rules
+It is possible to use the Rules inside each other like this
+```cpp
+const Rule Digit = Between('0','9');
+
+const Rule SmallAlphabet = Between('a','z');
+
+const Rule CapitalAlphabet = Between('A','Z');
+
+const Rule Alphabet = CapitalAlphabet | SmallAlphabet;
+
+const Rule Alphanumeric = Digit | Alphabet;
+
+```
+## Basic operations
+the basic operation you can do with Stringozzi
+1. **Test**: It validate the input string against the set rule 
+  ```cpp
+  Actions::Test(In("ABC"), "A")
+  ```
+2. **FastMatch**: like test but returns the related matches
+  ```cpp
+  MatchesA m;
+  Actions::FastMatch(In("ABC") >> "Match" , "A", m)
+  ```
+3. **Search**: it searches the string till the rule applies
+```cpp
+bool b = Actions::Search(Is('b'), "abc"); // true
+char* ptr = Actions::SearchAndGetPtr(Is('b'), "abc"); // "bc"
+int idx = Actions::SearchAndGetIndex(Is('b'), "abc"); // 1
+```
+4. **Match**: it is the combined ioperation of **Search** + **FastMatch** ... it searches the string till the rule applies 
+```cpp
+  MatchesA m;
+  Actions::Match(In("ABC") >> "Match" , "-----A", m)
+```
+  
+5. **Replace**:
+   searches the string till the rule applies and then replace the string match with the specified text 
+```cpp
+  Actions::Replace(Is("ABC"), "1234567ABC890ABC", "X", 0, 1) // "1234567X890ABC";
+```
+6. **Split**:
+   searches the string till the rule applies and then replace the string match with the specified text 
+```cpp
+	vector<string> vec;
+	Actions::Split(Is("<=>"), "1234567<=>ABC", vec, 0, true, 1); // ["1234567","ABC"]
+```
+
+### **Using Matches.. (Not :fire: ones :wink:)**
+
+There are two types of expression matches 
+1. __Named__ : where you set the name of the match in the rule
+2. __Anynomous__ : Any other tokens matched by expression elements
+
+you can use extract that way and get the resulting Matches
+```cpp
+MatchesA m;
+StringozziA str(Is('K') >> "MYMATCH"); //a rule to match letter K and store it as "MYMATCH"
+str.Match("K", m); // Match against string "K"
+
+//number of total matches entries 
+m.NumberOfMatches(); // == 2 => "K" and "<UNNAMED>" 
+
+// number of MYATCH entries
+m.NumberOfMatches("MYMATCH"); // == 1
+m.NumberOfMatches("NOTFOUND"); // == 0
+m.NumberOfMatches("<UNNAMED>"); //  == 1
+
+m.Get("MYMATCH",0); // "K"
+m.Get("MYMATCH",1); // <NULL>
+
+```
+### Case sensitivity
+The default mode for Stringozzin is case sensitive
+You can specify the case insensitivity in two ways
+either you can specify **SPEG_CASEINSENSITIVE** in the operation 
+```cpp
+Actions::Test(In("ABC"), "a", SPEG_CASEINSENSITIVE);
+```
+
+Or you can use mode change in the rule it self
+```cpp
+Actions::Test(CaseInsensitive > In("ABC") > CaseSensitive, "a") 
+```
 ### **- _Or_ Vs. _Greedy Or_**
 Consider this example 
 ```cpp
@@ -144,7 +231,7 @@ or using Greedy OR which seek the most benefitial match in a set of OR
 Rule r = (Is("Via") || Is("V")) > Is(':') ; // Works too !!
 ```
 
-### **-Recursive rules**
+### **Recursive rules**
 Sometimes we want to use the rule inside itself to check some recursive behaviour
 
 For instance .. we want to have some sort of brackets structured data like this
@@ -154,6 +241,9 @@ For instance .. we want to have some sort of brackets structured data like this
 ```
 
 we will face matching the parantheses properly.. the proble in such situations is we have to use an expression which is not even initialized
+
+> **WARNING:**
+> Generally take care to adjust the stopping condition in recursive rules to avoid stack overflow situation 
 
 
 #### **1- ```Ref``` operator**
@@ -178,4 +268,14 @@ ph.Inject(r);
 
 > **NOTE:**
 > PlaceHolder object does not touch reference counting of internal objects, so avoid using it with other rules objects.. this may leave to dangling pointer.. instead you can directly reference it in the rule 
+
+## Q&A
+**Q. Is the library thread-safe** ?
+A. Ammm..Yes and no ... the parsing expression tree is relying on reference counting which is atomic operation .. so using the same rule in multiple threads is Ok.. 
+However.. the parsing process is somehow dependent on each other so the internal context and matches table are not thread safe (and it should not be )..this is a design choice to not impact the speed of parsing 
+The rule of the thumb here ... keep the whole parsing cycle in the same thread.. 
+
+**Q. why case insensitivity is not working on European languages**
+A. Yes the internal 'to lower' function is ASCII only for now
+it is probable to add ICU lib to support such a function in near futrue ... ( just I dont like to overcomplicate things)
 
