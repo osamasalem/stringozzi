@@ -1,9 +1,33 @@
 #!/bin/bash
 set -e
 
-mkdir -p build_Linux 
-cd build_Linux
-cmake -DCMAKE_BUILD_TYPE=Release -Dgtest_force_shared_crt=TRUE  ..
+export CXXFLAGS=-m32
+mkdir -p build_Linux_DEBUG_x86 
+cd build_Linux_DEBUG_x86
+cmake -DCMAKE_BUILD_TYPE=Debug -DARCH=x86 -Dgtest_force_shared_crt=TRUE -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON ..
 cmake --build .
+cd ..
+
+
+export CXXFLAGS=-m32
+mkdir -p build_Linux_RELEASE_x86 
+cd build_Linux_RELEASE_x86
+cmake -DCMAKE_BUILD_TYPE=Release -DARCH=x86 -Dgtest_force_shared_crt=TRUE -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON ..
+cmake --build .
+cd ..
+
+export CXXFLAGS=-m64
+mkdir -p build_Linux_DEBUG_x64 
+cd build_Linux_DEBUG_x64
+cmake -DCMAKE_BUILD_TYPE=Debug -DARCH=x64 -Dgtest_force_shared_crt=TRUE -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON ..
+cmake --build .
+cd ..
+
+export CXXFLAGS=-m64
+mkdir -p build_Linux_RELEASE_x64 
+cd build_Linux_RELEASE_x64
+cmake -DCMAKE_BUILD_TYPE=Release -DARCH=x64 -Dgtest_force_shared_crt=TRUE -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON ..
+cmake --build .
+cd ..
 
 ../bin_Linux/stringozzi.test
