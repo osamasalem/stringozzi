@@ -36,6 +36,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "gtest/gtest.h"
 #include "Stringozzi.h"
+#include <string>
 
 using namespace SPEG;
 using namespace SPEG::Utils;
@@ -395,14 +396,14 @@ TEST(Manipulators, TestOneOrMore) {
 TEST(Operators, TestHost) {
   ASSERT_FALSE(StringozziA(Host > End).Test(NULL));
   ASSERT_FALSE(StringozziA(Host > End).Test(""));
-  ASSERT_TRUE (StringozziA(Host > End).Test("osama"));
-  ASSERT_TRUE (StringozziA(Host > End).Test("osama.net"));
+  ASSERT_TRUE(StringozziA(Host > End).Test("osama"));
+  ASSERT_TRUE(StringozziA(Host > End).Test("osama.net"));
   ASSERT_TRUE(StringozziA(Host > End).Test(".dddddd"));
   ASSERT_TRUE(StringozziA(Host > End).Test("-jfkjdfdk"));
-  ASSERT_TRUE (StringozziA(Host > End).Test("a-jfkjdfdk"));
+  ASSERT_TRUE(StringozziA(Host > End).Test("a-jfkjdfdk"));
   ASSERT_TRUE(StringozziA(Host > End).Test("a--jfkjdfdk"));
-  ASSERT_TRUE (StringozziA(Host > End).Test("www.google.com"));
-  ASSERT_TRUE (StringozziA(Host > End).Test("111.222.111.222"));
+  ASSERT_TRUE(StringozziA(Host > End).Test("www.google.com"));
+  ASSERT_TRUE(StringozziA(Host > End).Test("111.222.111.222"));
   ASSERT_TRUE(StringozziA(Host > End).Test("ABCABABC"));
 }
 
@@ -460,6 +461,18 @@ TEST(Actions, TestReplace) {
             .Replace("1234567OsamOsamadddd"
             , "lol").c_str()
             , "1234567Osamloldddd");
+}
+
+TEST(Actions, TestReplaceInPlace) {
+  std::wstring wstr = L"ABCDEFG";
+  wstr.reserve(50);
+  StringozziW(Is("CDE")).Replace(&wstr[0], 50, L"XYZ");
+  ASSERT_STREQ(wstr.c_str(), L"ABXYZFG");
+
+  std::string str = "ABCDEFG";
+  str.reserve(50);
+  StringozziA(Is("CDE")).Replace(&str[0], 50, "XYZ");
+  ASSERT_STREQ(str.c_str(), "ABXYZFG");
 }
 
 TEST(Actions, TestSearch) {

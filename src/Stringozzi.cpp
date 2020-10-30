@@ -419,34 +419,87 @@ DLL_PUBLIC Rule Rule::operator=(const Rule &other) {
   return ((*this));
 }
 }  // namespace Core
+}  // namespace SPEG
 
+DLL_PUBLIC SPEG::Core::Rule operator > (const SPEG::Core::Rule& first
+            , const SPEG::Core::Rule& second) {
+  return SPEG::Operators::Sequence(first, second);
+}
+
+
+DLL_PUBLIC SPEG::Core::Rule operator & (const SPEG::Core::Rule& first
+            , const SPEG::Core::Rule& second) {
+  return new SPEG::Manipulators::AndValidator(first.Get(), second.Get());
+}
+
+DLL_PUBLIC SPEG::Core::Rule operator | (const SPEG::Core::Rule& first
+              , const SPEG::Core::Rule& second) {
+    return new SPEG::Manipulators::OrValidator(first.Get(), second.Get());
+}
+DLL_PUBLIC SPEG::Core::Rule operator ||(const SPEG::Core::Rule &first
+            , const SPEG::Core::Rule &second) {
+  return new SPEG::Manipulators::GreedyOrValidator(first.Get(), second.Get());
+}
+
+DLL_PUBLIC SPEG::Core::Rule operator! (const SPEG::Core::Rule& rule) {
+    return new SPEG::Manipulators::NotValidator(rule.Get());
+}
+
+DLL_PUBLIC SPEG::Core::Rule operator* (const SPEG::Core::Rule& rule) {
+  return new SPEG::Manipulators::RepeatValidator(rule.Get(), 0, -1);
+}
+
+DLL_PUBLIC SPEG::Core::Rule operator* (const unsigned int num
+              , const SPEG::Core::Rule& rule) {
+  return new SPEG::Manipulators::RepeatValidator(rule.Get(), num, num);
+}
+
+DLL_PUBLIC SPEG::Core::Rule operator* (const SPEG::Core::Rule& rule
+              , const unsigned int num) {
+  return new SPEG::Manipulators::RepeatValidator(rule.Get(), num, num);
+}
+
+DLL_PUBLIC SPEG::Core::Rule operator+ (const unsigned int num
+            , const SPEG::Core::Rule& rule) {
+  return new SPEG::Manipulators::RepeatValidator(rule.Get(), 1, num);
+}
+
+DLL_PUBLIC SPEG::Core::Rule operator+ (const SPEG::Core::Rule& rule
+            , const unsigned int num) {
+  return new SPEG::Manipulators::RepeatValidator(rule.Get(), 1, num);
+}
+DLL_PUBLIC SPEG::Core::Rule operator* (const SPEG::Utils::Range& rng
+          , const SPEG::Core::Rule& rule) {
+  return new SPEG::Manipulators::RepeatValidator(rule.Get(), rng.MIN, rng.MAX);
+}
+
+DLL_PUBLIC SPEG::Core::Rule operator* (const SPEG::Core::Rule& rule
+          , const SPEG::Utils::Range& rng) {
+  return new SPEG::Manipulators::RepeatValidator(rule.Get(), rng.MIN, rng.MAX);
+}
+
+DLL_PUBLIC SPEG::Core::Rule operator+ (const SPEG::Core::Rule& rule) {
+  return new SPEG::Manipulators::RepeatValidator(rule.Get(), 1, -1);
+}
+
+DLL_PUBLIC SPEG::Core::Rule operator~ (const SPEG::Core::Rule& rule) {
+    return new SPEG::Manipulators::RepeatValidator(rule.Get(), 0, 1);
+}
+
+DLL_PUBLIC SPEG::Core::Rule operator >> (const SPEG::Core::Rule& rule
+            , const char* key) {
+  ADJUST_NULL_STR(key);
+  return new SPEG::Manipulators::ExtractValidator(rule.Get(), key);
+}
+
+namespace SPEG {
 namespace Operators {
 DLL_PUBLIC Rule Sequence(const Rule &first, const Rule &second) {
   return new Manipulators::SeqValidator(first.Get(), second.Get());
 }
 
-DLL_PUBLIC Rule operator>(const Rule &first, const Rule& second) {
-  return Sequence(first, second);
-}
-
-DLL_PUBLIC Rule operator&(const Rule &first, const Rule &second) {
-  return new Manipulators::AndValidator(first.Get(), second.Get());
-}
-
-DLL_PUBLIC Rule operator|(const Rule &first, const Rule &second) {
-  return new Manipulators::OrValidator(first.Get(), second.Get());
-}
-
-DLL_PUBLIC Rule operator||(const Rule &first, const Rule &second) {
-  return new Manipulators::GreedyOrValidator(first.Get(), second.Get());
-}
-
 DLL_PUBLIC Rule Not(const Rule &rule) {
   return new Manipulators::NotValidator(rule.Get());
-}
-
-DLL_PUBLIC Rule operator!(const Rule &rule) {
-  return Not(rule);
 }
 
 DLL_PUBLIC Rule ZeroOrOne(const Rule &rule) {
@@ -465,20 +518,8 @@ DLL_PUBLIC Rule ZeroOrMore(const Rule &rule) {
   return new Manipulators::RepeatValidator(rule.Get(), 0, -1);
 }
 
-DLL_PUBLIC Rule operator*(const Rule &rule) {
-  return ZeroOrMore(rule);
-}
-
 DLL_PUBLIC Rule Times(const Rule &rule, const unsigned int num) {
   return new Manipulators::RepeatValidator(rule.Get(), num, num);
-}
-
-DLL_PUBLIC Rule operator*(const unsigned int num, const Rule &rule) {
-  return Times(rule, num);
-}
-
-DLL_PUBLIC Rule operator*(const Rule &rule, const unsigned int num) {
-  return Times(rule, num);
 }
 
 DLL_PUBLIC Rule OneOrMore(const Rule &rule, const unsigned int num) {
@@ -489,26 +530,6 @@ DLL_PUBLIC Rule OneOrMore(const Rule &rule) {
   return new Manipulators::RepeatValidator(rule.Get(), 1, -1);
 }
 
-DLL_PUBLIC Rule operator+(const unsigned int num, const Rule &rule) {
-  return OneOrMore(rule, num);
-}
-
-DLL_PUBLIC Rule operator+(const Rule &rule, const unsigned int num) {
-  return OneOrMore(rule, num);
-}
-
-DLL_PUBLIC Rule operator*(const Utils::Range &rng, const Rule &rule) {
-  return new Manipulators::RepeatValidator(rule.Get(), rng.MIN, rng.MAX);
-}
-
-DLL_PUBLIC Rule operator*(const Rule &rule, const Utils::Range &rng) {
-  return new Manipulators::RepeatValidator(rule.Get(), rng.MIN, rng.MAX);
-}
-
-DLL_PUBLIC Rule operator+(const Rule &rule) {
-  return OneOrMore(rule);
-}
-
 DLL_PUBLIC Rule LookAhead(const Rule &rule) {
   return new Manipulators::LookAheadValidator(rule.Get());
 }
@@ -516,11 +537,6 @@ DLL_PUBLIC Rule LookAhead(const Rule &rule) {
 DLL_PUBLIC Rule LookBack(const Rule &rule) {
   return new Manipulators::LookBackValidator(rule.Get());
 }
-
-DLL_PUBLIC Rule operator~(const Rule &rule) {
-  return ZeroOrOne(rule);
-}
-
 
 DLL_PUBLIC_VAR const Rule Any = new Primitives::AnyValidator();
 
@@ -589,16 +605,16 @@ const Rule h16Colon = h16 > COLON;
 const Rule ls32 = (h16Colon > h16) | IPv4;
 
 
-DLL_PUBLIC_VAR const Rule IPv6 =                              ((6 * (h16Colon)) > ls32)
-                 || (                            DBLCOLON > (5 * (h16Colon)) > ls32)
-                 || (~h16                      > DBLCOLON > (4 * (h16Colon)) > ls32)
-                 || (~((1 * (h16Colon)) > h16) > DBLCOLON >	   (3 * (h16Colon)) > ls32)
-                 || (~((2 * (h16Colon)) > h16) > DBLCOLON >    (2 * (h16Colon)) > ls32)
-                 || (~((3 * (h16Colon)) > h16) > DBLCOLON >    (1 * (h16Colon)) > ls32)
-                 || (~((4 * (h16Colon)) > h16) > DBLCOLON                       > ls32)
-                 || (~((5 * (h16Colon)) > h16) > DBLCOLON > h16)
-                 || (~((6 * (h16Colon)) > h16) > DBLCOLON)
-         ;
+DLL_PUBLIC_VAR const Rule IPv6 =
+     ((6 * (h16Colon)) > ls32)
+  || (DBLCOLON > (5 * (h16Colon)) > ls32)
+  || (~h16 > DBLCOLON > (4 * (h16Colon)) > ls32)
+  || (~((1 * (h16Colon)) > h16) > DBLCOLON > (3 * (h16Colon)) > ls32)
+  || (~((2 * (h16Colon)) > h16) > DBLCOLON >    (2 * (h16Colon)) > ls32)
+  || (~((3 * (h16Colon)) > h16) > DBLCOLON >    (1 * (h16Colon)) > ls32)
+  || (~((4 * (h16Colon)) > h16) > DBLCOLON                       > ls32)
+  || (~((5 * (h16Colon)) > h16) > DBLCOLON > h16)
+  || (~((6 * (h16Colon)) > h16) > DBLCOLON);
 
 
 
@@ -606,8 +622,8 @@ DLL_PUBLIC_VAR const Rule IPv6 =                              ((6 * (h16Colon)) 
 
 const Rule Host = (+((Is('%') > Hex > Hex)
           | Alphanumeric
-          | In("-_.~!$&'()*+,;="))) 
-          || IPv4 
+          | In("-_.~!$&'()*+,;=")))
+          || IPv4
           || IPv6;
 
 
@@ -633,22 +649,18 @@ DLL_PUBLIC Rule Extract(const Rule &rule) {
   return new Manipulators::ExtractValidator(rule.Get());
 }
 
-DLL_PUBLIC Rule operator>>(const Rule &rule, const char *key) {
-  return Extract(rule, key);
-}
-
 DLL_PUBLIC Rule Enclosed(const Rule &rule, const char *quote) {
-  ADJUST_NULL_STR(quote);  
+  ADJUST_NULL_STR(quote);
   Rule quoteRule = Is(quote);
   return quoteRule  > rule > quoteRule;
 }
 
-DLL_PUBLIC Rule Enclosed(const Rule &r, const char *open
+DLL_PUBLIC Rule Enclosed(const Rule &rule, const char *open
                             , const char *close) {
   ADJUST_NULL_STR(open);
   ADJUST_NULL_STR(close);
-                 
-  return Is(open) > r > Is(close);
+
+  return Is(open) > rule > Is(close);
 }
 
 DLL_PUBLIC_VAR const Rule CaseSensitive =
@@ -656,41 +668,41 @@ DLL_PUBLIC_VAR const Rule CaseSensitive =
 DLL_PUBLIC_VAR const Rule CaseInsensitive =
             new StateKeepers::CaseModifier(true);
 
-DLL_PUBLIC Rule Set(const char *f) {
-  RETURN_IF_NULL(f, Rule());
-  return new StateKeepers::SetFlagModifier(f);
+DLL_PUBLIC Rule Set(const char *flag) {
+  RETURN_IF_NULL(flag, Rule());
+  return new StateKeepers::SetFlagModifier(flag);
 }
 
-DLL_PUBLIC Rule Set(const char *f, const char *v) {
-  RETURN_IF_NULL(f, Rule());
-  RETURN_IF_NULL(v, Rule());
-  return new StateKeepers::SetFlagModifier(f, v);
+DLL_PUBLIC Rule Set(const char *flag, const char *value) {
+  RETURN_IF_NULL(flag, Rule());
+  RETURN_IF_NULL(value, Rule());
+  return new StateKeepers::SetFlagModifier(flag, value);
 }
 
-DLL_PUBLIC Rule Del(const char *f) {
-  RETURN_IF_NULL(f, Rule());
-  return new StateKeepers::DelFlagModifier(f);
+DLL_PUBLIC Rule Del(const char *flag) {
+  RETURN_IF_NULL(flag, Rule());
+  return new StateKeepers::DelFlagModifier(flag);
 }
 
-DLL_PUBLIC Rule If(const char *f) {
-  RETURN_IF_NULL(f, Rule());
-  return new StateKeepers::IfValidator(f);
+DLL_PUBLIC Rule If(const char *flag) {
+  RETURN_IF_NULL(flag, Rule());
+  return new StateKeepers::IfValidator(flag);
 }
 
-DLL_PUBLIC Rule If(const char *f, const char *v) {
-  RETURN_IF_NULL(f, Rule());
-  RETURN_IF_NULL(v, Rule());
-  return new StateKeepers::IfValidator(f, v);
+DLL_PUBLIC Rule If(const char *flag, const char *value) {
+  RETURN_IF_NULL(flag, Rule());
+  RETURN_IF_NULL(value, Rule());
+  return new StateKeepers::IfValidator(flag, value);
 }
 
-DLL_PUBLIC Rule Ref(const Rule &r) {
-  return new Manipulators::RefValidator(r);
+DLL_PUBLIC Rule Ref(const Rule &rule) {
+  return new Manipulators::RefValidator(rule);
 }
 
 DLL_PUBLIC Rule Ref(Utils::PlaceHolder& ph) {
-  Manipulators::RefValidator *r = new Manipulators::RefValidator();
-  ph.Set(r);
-  return r;
+  Manipulators::RefValidator *ref = new Manipulators::RefValidator();
+  ph.Set(ref);
+  return ref;
 }
 
 DLL_PUBLIC Rule IfMatched(const char* key) {

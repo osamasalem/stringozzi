@@ -349,20 +349,20 @@ class Matches {
       return NULL;
 
 
-    VECTOR& v = it->second;
-    if (index >= v.size())
+    VECTOR& vec = it->second;
+    if (index >= vec.size())
       return NULL;
 
 
-    MATCH& m = v.at(index);
-    if (m.Index == -1) {
-      unsigned int size = static_cast<const __CHARTYPE*>(m.End)
-                - static_cast<const __CHARTYPE*>(m.Start);
-      _matchesStrings.push_back(STRING((__CHARTYPE*)m.Start, size));
-      m.Index = _matchesStrings.size() - 1;
+    MATCH& match = vec.at(index);
+    if (match.Index == -1) {
+      unsigned int size = static_cast<const __CHARTYPE*>(match.End)
+                - static_cast<const __CHARTYPE*>(match.Start);
+      _matchesStrings.push_back(STRING((__CHARTYPE*)match.Start, size));
+      match.Index = _matchesStrings.size() - 1;
     }
 
-    return _matchesStrings[m.Index].c_str();
+    return _matchesStrings[match.Index].c_str();
   }
 
   /**
@@ -513,12 +513,12 @@ class ContextInterface {
   /**
    * @brief Compare a character with the the character under parsing cursor
    * 
-   * @param c the input character
+   * @param chr the input character
    * @return const int 1 if current char greater than the input character 
    *                   -1 if current char lesser than the input character
    *                    0 if they are equal
    */
-  virtual const int Compare(SChar c) = 0;
+  virtual const int Compare(SChar chr) = 0;
 
   /**
    * @brief Get the character under parsing cursor in UTF32
@@ -679,9 +679,9 @@ class Context : public ContextInterface {
   }
 
 
-  virtual const int Compare(SChar c) {
+  virtual const int Compare(SChar chr) {
     SChar local = _Get();
-    SChar other = _Get(c);
+    SChar other = _Get(chr);
     if (local > other)
       return 1;
     else if (local < other)
@@ -1013,11 +1013,11 @@ typedef BetweenValidator<char32_t>  BetweenValidatorU32;
  * @brief it recieves a string containing a sequence of characters 
  * if the character under the cursor follows the same context it returns 
  * true.. false otherwise 
- * @tparam __T characted type
+ * @tparam __CHARTYPE characted type
  */
-template<typename __T>
+template<typename __CHARTYPE>
 class ExactValidator : public Core::NormalValidator {
-  const __T* _phrase;
+  const __CHARTYPE* _phrase;
 
  public:
  /**
@@ -1025,11 +1025,11 @@ class ExactValidator : public Core::NormalValidator {
   * 
   * @param phrase the phrase which the text will be compared with
   */
-  explicit ExactValidator(const __T* phrase) : _phrase(phrase) {}
+  explicit ExactValidator(const __CHARTYPE* phrase) : _phrase(phrase) {}
 
   virtual bool Check(Core::ContextInterface* context) const {
     context->AdjustPosition();
-    const __T* phrasePointer = _phrase;
+    const __CHARTYPE* phrasePointer = _phrase;
     Core::Position start = context->GetPosition();
     while (*phrasePointer) {
       SChar chr = Utils::GetChar(phrasePointer);
@@ -1222,7 +1222,7 @@ class RefValidator : public Core::NormalValidator {
   const Core::Rule* _rule;
  public:
   RefValidator() : _rule(NULL), _validator(NULL) {}
-  explicit RefValidator(const Core::Rule& r) : _rule(&r)
+  explicit RefValidator(const Core::Rule& rule) : _rule(&rule)
           , _validator(NULL) {}
 
   virtual bool Check(Core::ContextInterface* context) const;
@@ -1390,7 +1390,148 @@ class Rule {
   }
 };
 }  // namespace Core
+}  // namespace SPEG
+/**
+ * @brief A then B
+ * 
+ * @param first 
+ * @param second 
+ * @return DLL_PUBLIC 
+ */
+DLL_PUBLIC SPEG::Core::Rule operator > (const SPEG::Core::Rule& first
+            , const SPEG::Core::Rule& second);
 
+/**
+ * @brief A and B
+ * 
+ * @param first 
+ * @param second 
+ * @return DLL_PUBLIC 
+ */
+DLL_PUBLIC SPEG::Core::Rule operator & (const SPEG::Core::Rule& first
+            , const SPEG::Core::Rule& second);
+/**
+ * @brief A or B
+ * 
+ * @param first 
+ * @param second 
+ * @return DLL_PUBLIC 
+ */
+DLL_PUBLIC SPEG::Core::Rule operator | (const SPEG::Core::Rule& first
+              , const SPEG::Core::Rule& second);
+/**
+ * @brief A or B and match the most relevant
+ * 
+ * @param first 
+ * @param second 
+ * @return DLL_PUBLIC 
+ */
+DLL_PUBLIC SPEG::Core::Rule operator ||(const SPEG::Core::Rule &first
+            , const SPEG::Core::Rule &second);
+/**
+ * @brief Not A
+ * 
+ * @param rule 
+ * @return DLL_PUBLIC 
+ */
+DLL_PUBLIC SPEG::Core::Rule operator! (const SPEG::Core::Rule& rule);
+
+/**
+ * @brief zero or more A
+ * 
+ * @param rule 
+ * @return DLL_PUBLIC 
+ */
+DLL_PUBLIC SPEG::Core::Rule operator* (const SPEG::Core::Rule& rule);
+
+/**
+ * @brief N times of A
+ * 
+ * @param num 
+ * @param rule 
+ * @return DLL_PUBLIC 
+ */
+
+DLL_PUBLIC SPEG::Core::Rule operator* (const unsigned int num
+              , const SPEG::Core::Rule& rule);
+
+/**
+ * @brief N times of A
+ * 
+ * @param rule 
+ * @param num 
+ * @return DLL_PUBLIC 
+ */
+DLL_PUBLIC SPEG::Core::Rule operator* (const SPEG::Core::Rule& rule
+              , const unsigned int num);
+
+/**
+ * @brief Once to N times A
+ * 
+ * @param num 
+ * @param rule 
+ * @return DLL_PUBLIC 
+ */
+DLL_PUBLIC SPEG::Core::Rule operator+ (const unsigned int num
+            , const SPEG::Core::Rule& rule);
+/**
+ * @brief Once to N times A
+ * 
+ * @param num 
+ * @param rule 
+ * @return DLL_PUBLIC 
+ */
+DLL_PUBLIC SPEG::Core::Rule operator+ (const SPEG::Core::Rule& rule
+            , const unsigned int num);
+/**
+ * @brief N to M times A
+ * 
+ * @param rng 
+ * @param rule 
+ * @return DLL_PUBLIC 
+ */
+DLL_PUBLIC SPEG::Core::Rule operator* (const SPEG::Utils::Range& rng
+          , const SPEG::Core::Rule& rule);
+
+/**
+ * @brief N to M times A
+ * 
+ * @param rng 
+ * @param rule 
+ * @return DLL_PUBLIC 
+ */
+DLL_PUBLIC SPEG::Core::Rule operator* (const SPEG::Core::Rule& rule
+          , const SPEG::Utils::Range& rng);
+
+/**
+ * @brief 1 or more A
+ * 
+ * @param rng 
+ * @param rule 
+ * @return DLL_PUBLIC 
+ */
+DLL_PUBLIC SPEG::Core::Rule operator+ (const SPEG::Core::Rule& rule);
+
+/**
+ * @brief Optional A
+ * 
+ * @param rule 
+ * @return DLL_PUBLIC 
+ */
+
+DLL_PUBLIC SPEG::Core::Rule operator~ (const SPEG::Core::Rule& rule);
+
+/**
+ * @brief Extract A to key
+ * 
+ * @param rule 
+ * @param key 
+ * @return DLL_PUBLIC 
+ */
+DLL_PUBLIC SPEG::Core::Rule operator >> (const SPEG::Core::Rule& rule
+            , const char* key);
+
+namespace SPEG {
 /**
  * @brief  the operators that construct Stringozzi Rule
  * 
@@ -1401,41 +1542,9 @@ using namespace Core;
  * @brief A then B 
  */
 DLL_PUBLIC Rule Sequence(const Rule& first, const Rule& second);
-/**
- * @brief A then B 
- * 
- * @param first 
- * @param second 
- * @return DLL_PUBLIC 
- */
-DLL_PUBLIC Rule operator > (const Rule& first, const Rule& second);
-/**
- * @brief A and B
- * 
- * @param first 
- * @param second 
- * @return DLL_PUBLIC 
- */
-DLL_PUBLIC Rule operator & (const Rule& first, const Rule& second);
-/**
- * @brief A or B
- * 
- * @param first 
- * @param second 
- * @return DLL_PUBLIC 
- */
-DLL_PUBLIC Rule operator | (const Rule& first, const Rule& second);
-/**
- * @brief  A or B with best relevance
- * 
- * @param first 
- * @param second 
- * @return DLL_PUBLIC 
- */
-DLL_PUBLIC Rule operator ||(const Rule &first, const Rule &second);
 
 /**
- * @brief Is Exact char c 
+ * @brief Is Exact char chr 
  * 
  * @tparam __CHARTYPE 
  * @param chr 
@@ -1453,13 +1562,6 @@ Rule Is(const __CHARTYPE chr) {
  * @return DLL_PUBLIC 
  */
 DLL_PUBLIC Rule Not(const Rule& rule);
-/**
- * @brief Not A
- * 
- * @param rule 
- * @return DLL_PUBLIC 
- */
-DLL_PUBLIC Rule operator! (const Rule& rule);
 
 /**
  * @brief (0->1) * A
@@ -1493,13 +1595,6 @@ DLL_PUBLIC Rule ZeroOrMore(const Rule& rule, const unsigned int num);
  */
 DLL_PUBLIC Rule ZeroOrMore(const Rule& rule);
 
-/**
- * @brief Exact instances of  A
- * 
- * @param rule 
- * @return DLL_PUBLIC 
- */
-DLL_PUBLIC Rule operator* (const Rule& rule);
 
 /**
  * @brief n times of A 
@@ -1509,24 +1604,6 @@ DLL_PUBLIC Rule operator* (const Rule& rule);
  * @return DLL_PUBLIC 
  */
 DLL_PUBLIC Rule Times(const Rule& rule, const unsigned int num);
-
-/**
- * @brief n times of A 
- * 
- * @param num 
- * @param rule 
- * @return DLL_PUBLIC 
- */
-DLL_PUBLIC Rule operator* (const unsigned int num, const Rule& rule);
-
-/**
- * @brief n times of A 
- * 
- * @param rule 
- * @param num 
- * @return DLL_PUBLIC 
- */
-DLL_PUBLIC Rule operator* (const Rule& rule, const unsigned int num);
 
 /**
  * @brief (1->num) times of A 
@@ -1545,52 +1622,10 @@ DLL_PUBLIC Rule OneOrMore(const Rule& rule, const unsigned int num);
  */
 DLL_PUBLIC Rule OneOrMore(const Rule& rule);
 
-/**
- * @brief (1->num) times of A 
- * 
- * @param num 
- * @param rule 
- * @return DLL_PUBLIC 
- */
-DLL_PUBLIC Rule operator+ (const unsigned int num, const Rule& rule);
+
 
 /**
- * @brief (1->num) times of A
- * 
- * @param rule 
- * @param num 
- * @return DLL_PUBLIC 
- */
-DLL_PUBLIC Rule operator+ (const Rule& rule, const unsigned int num);
-
-/**
- * @brief (min->max) times of A 
- * 
- * @param rng 
- * @param rule 
- * @return DLL_PUBLIC 
- */
-DLL_PUBLIC Rule operator* (const Utils::Range& rng, const Rule& rule);
-
-/**
- * @brief (min->max) times of A 
- * 
- * @param rule 
- * @param rng 
- * @return DLL_PUBLIC 
- */
-DLL_PUBLIC Rule operator* (const Rule& rule, const Utils::Range& rng);
-
-/**
- * @brief (1->INFINITY) times of A 
- * 
- * @param rule 
- * @return DLL_PUBLIC 
- */
-DLL_PUBLIC Rule operator+ (const Rule& rule);
-
-/**
- * @brief char between (min < c < max)
+ * @brief char between (min < chr < max)
  * 
  * @tparam __CHARTYPE 
  * @param min 
@@ -1657,13 +1692,6 @@ DLL_PUBLIC Rule LookAhead(const Rule& rule);
  */
 DLL_PUBLIC Rule LookBack(const Rule& rule);
 
-/**
- * @brief Optional A
- * 
- * @param rule 
- * @return DLL_PUBLIC 
- */
-DLL_PUBLIC Rule operator~ (const Rule& rule);
 /**
  * @brief Any
  * 
@@ -1847,10 +1875,10 @@ Rule Out(const __CHARTYPE* set) {
 /**
  * @brief skip letters till the rule applies 
  * 
- * @param r 
+ * @param rule 
  * @return DLL_PUBLIC 
  */
-DLL_PUBLIC Rule SkipTo(const Rule& r);
+DLL_PUBLIC Rule SkipTo(const Rule& rule);
 
 /**
  * @brief skip fixed number of letters 
@@ -1863,106 +1891,98 @@ DLL_PUBLIC Rule SkipTo(const unsigned long count);
 /**
  * @brief Stop when rule applies ..return false if it does not exist 
  * 
- * @param r 
+ * @param rule 
  * @return DLL_PUBLIC 
  */
-DLL_PUBLIC Rule Until(const Rule& r);
+DLL_PUBLIC Rule Until(const Rule& rule);
 
 /**
  * @brief extract to matach named key 
  * 
- * @param r 
+ * @param rule 
  * @param key 
  * @return DLL_PUBLIC 
  */
-DLL_PUBLIC Rule Extract(const Rule& r, const char* key);
+DLL_PUBLIC Rule Extract(const Rule& rule, const char* key);
 
 /**
  * @brief extract but unnamed 
  * 
- * @param r 
+ * @param rule 
  * @return DLL_PUBLIC 
  */
-DLL_PUBLIC Rule Extract(const Rule& r);
+DLL_PUBLIC Rule Extract(const Rule& rule);
 
-/**
- * @brief extract to matach named key 
- * 
- * @param r 
- * @param key 
- * @return DLL_PUBLIC 
- */
-DLL_PUBLIC Rule operator >> (const Rule& r, const char* key);
 
 /**
  * @brief the rule is enclosed between quote symbol 
  * 
- * @param r 
+ * @param rule 
  * @param quote 
  * @return DLL_PUBLIC 
  */
-DLL_PUBLIC Rule Enclosed(const Rule& r, const char* quote);
+DLL_PUBLIC Rule Enclosed(const Rule& rule, const char* quote);
 
 /**
  * @brief enclosed between open/close marks 
  * 
- * @param r 
+ * @param rule 
  * @param open 
  * @param close 
  * @return DLL_PUBLIC 
  */
-DLL_PUBLIC Rule Enclosed(const Rule& r, const char* open
+DLL_PUBLIC Rule Enclosed(const Rule& rule, const char* open
                             , const char* close);
 
 /**
  * @brief Set context variable with name 
  * 
- * @param f 
+ * @param flag
  * @return DLL_PUBLIC 
  */
-DLL_PUBLIC Rule Set(const char* f);
+DLL_PUBLIC Rule Set(const char* flag);
 
 /**
  * @brief set context variable with name and value 
  * 
- * @param f 
- * @param v 
+ * @param flag
+ * @param value 
  * @return DLL_PUBLIC 
  */
-DLL_PUBLIC Rule Set(const char* f, const char* v);
+DLL_PUBLIC Rule Set(const char* flag, const char* value);
 
 /**
  * @brief Delete/unset context variable 
  * 
- * @param f 
+ * @param flag 
  * @return DLL_PUBLIC 
  */
-DLL_PUBLIC Rule Del(const char* f);
+DLL_PUBLIC Rule Del(const char* flag);
 
 /**
  * @brief if context variable equals "1" 
  * 
- * @param f 
+ * @param flag 
  * @return DLL_PUBLIC 
  */
-DLL_PUBLIC Rule If(const char* f);
+DLL_PUBLIC Rule If(const char* flag);
 
 /**
  * @brief if context variable equals value 
  * 
- * @param f 
- * @param v 
+ * @param flag 
+ * @param value
  * @return DLL_PUBLIC 
  */
-DLL_PUBLIC Rule If(const char* f, const char* v);
+DLL_PUBLIC Rule If(const char* flag, const char* value);
 
 /**
  * @brief reference the rule recursively 
  * 
- * @param r 
+ * @param rule 
  * @return DLL_PUBLIC 
  */
-DLL_PUBLIC Rule Ref(const Rule& r);
+DLL_PUBLIC Rule Ref(const Rule& rule);
 
 /**
  * @brief if named rule already matched at least once 
@@ -2009,27 +2029,34 @@ class Stringozzi {
  /**
   * @brief Construct a new Stringozzi object
   * 
-  * @param r 
+  * @param rule the rule to be checked
   */
-  explicit Stringozzi(const Core::Rule& r) : _rule(r) {}
+  explicit Stringozzi(const Core::Rule& rule) : _rule(rule) {}
 
  /**
  * @brief direct testing the string versus the rule ..
  *  no search conducted 
  * 
- * @param str 
- * @param flags 
- * @return true 
- * @return false 
+ * @param str the string to be validated 
+ * @param flags parsing flags
+ * @return true sucess
+ * @return false otherwise
  */
-  bool Test(const __CHARTYPE* str, unsigned long flags = 0) {
+  bool Test(const __CHARTYPE* str, unsigned long flags = 0UL) {
     RETURN_FALSE_IF_NULL(str);
-
     Core::Context<__CHARTYPE> context(str, flags);
     return _rule.Check(&context);
   }
 
-  bool FastMatch(const __CHARTYPE* str, unsigned long flags = 0) {
+/**
+ * @brief  like test but returns the related matches
+ * 
+ * @param str string to be validated 
+ * @param flags parsing flags
+ * @return true in case of success
+ * @return false otherwise
+ */
+  bool FastMatch(const __CHARTYPE* str, unsigned long flags = 0UL) {
     RETURN_FALSE_IF_NULL(str);
     Utils::Matches<__CHARTYPE> _matches;
     Core::Context<__CHARTYPE> context(str, flags, &_matches);
@@ -2039,8 +2066,8 @@ class Stringozzi {
   /**
    * @brief Search the text for the specified rule 
    * 
-   * @param str 
-   * @param flags 
+   * @param str string to be found
+   * @param flags parsing flags
    * @return true if found
    * @return false otherwise
    */
@@ -2056,17 +2083,17 @@ class Stringozzi {
    * @brief Search the text for the specified rule and return 
    * string pointer of the first match
    * 
-   * @param str 
-   * @param flags 
-   * @return const __CHARTYPE* 
+   * @param str string to be searched
+   * @param flags parsing flags
+   * @return const __CHARTYPE* pointer to the first occurance
    */
   const __CHARTYPE* SearchAndGetPtr(const __CHARTYPE* str
           , unsigned long flags = 0) {
     RETURN_IF_NULL(str, NULL);
     Utils::Matches<__CHARTYPE> matches;
     Core::Context<__CHARTYPE> context(str, flags);
-    Core::Rule r = Operators::Until(_rule);
-    if (r.Check(&context))
+    Core::Rule rule = Operators::Until(_rule);
+    if (rule.Check(&context))
       return static_cast<const __CHARTYPE*>(context.GetPosition());
     else
       return NULL;
@@ -2077,8 +2104,8 @@ class Stringozzi {
  * index of the first match
  * 
  * 
- * @param str 
- * @param flags 
+ * @param str string to be searched
+ * @param flags parsing flags
  * @return size_t 
  */
   size_t SearchAndGetIndex(const __CHARTYPE* str
@@ -2086,8 +2113,8 @@ class Stringozzi {
     RETURN_IF_NULL(str, -1);
     Utils::Matches<__CHARTYPE> _matches;
     const Core::Context<__CHARTYPE> context(str, flags, &_matches);
-    Core::Rule r = Operators::Until(_rule);
-    if (r.Check(&context))
+    Core::Rule rule = Operators::Until(_rule);
+    if (rule.Check(&context))
       return static_cast<const __CHARTYPE*>(context->GetPosition()) - str;
     else
       return -1;
@@ -2096,11 +2123,11 @@ class Stringozzi {
 /**
  * @brief search text for the rule, if found .. it returns all matches  
  * 
- * @param str 
- * @param matches 
- * @param flags 
- * @return true 
- * @return false 
+ * @param str string to be matched
+ * @param matches matches table object to be filled
+ * @param flags parsing flags
+ * @return true if success
+ * @return false otherwise
  */
   bool Match(const __CHARTYPE* str
           , Utils::Matches<__CHARTYPE>& matches
@@ -2109,7 +2136,7 @@ class Stringozzi {
     flags = flags | SPEG_MATCHNAMED | SPEG_MATCHUNNAMED;
     const __CHARTYPE* ptr = SearchAndGetPtr(str, flags);
 
-	RETURN_FALSE_IF_NULL(ptr);
+    RETURN_FALSE_IF_NULL(ptr);
     Core::Context<__CHARTYPE> context(ptr, flags);
     bool ret =  _rule.Check(&context);
     matches = context.Matches();
@@ -2121,66 +2148,67 @@ class Stringozzi {
  * @brief Search the text and replace the matched token with 
  * the specified string
  * 
- * @param str 
- * @param rep 
- * @param flags 
- * @param count 
- * @return STRING 
+ * @param str string to be checked
+ * @param rep replacement string
+ * @param flags parsing flags
+ * @param count number of replacements
+ * @return STRING the new string after replace
  */
   STRING Replace(const __CHARTYPE* str, const __CHARTYPE* rep
     , unsigned long flags = 0
     , unsigned int count = 1 ) {
-    RETURN_IF_NULL(str,"\0\0\0\0");
-    RETURN_IF_NULL(rep,"\0\0\0\0");
-    
+    RETURN_IF_NULL(str, (__CHARTYPE*) "\0\0\0\0");
+    RETURN_IF_NULL(rep, (__CHARTYPE*) "\0\0\0\0");
+
     Core::Context<__CHARTYPE> context(str, flags);
     Core::Position last_start = str;
-    Core::Rule r = Operators::Until(_rule);
-    STRING s;
+    Core::Rule rule = Operators::Until(_rule);
+    STRING strobj;
 
-    for (unsigned int i = 0; i < count && r.Check(&context); i++) {
+    for (unsigned int i = 0; i < count && rule.Check(&context); i++) {
       Core::Position start = context.GetPosition();
       _rule.Check(&context);
       Core::Position end = context.GetPosition();
-      s.append(static_cast<const __CHARTYPE*>(last_start)
+      strobj.append(static_cast<const __CHARTYPE*>(last_start)
             , static_cast<const __CHARTYPE*>(start)
             - static_cast<const __CHARTYPE*>(last_start));
-      s.append(rep);
+      strobj.append(rep);
       last_start = static_cast<const __CHARTYPE*>(end);
     }
-    s.append(static_cast<const __CHARTYPE*>(last_start));
-    return s;
+    strobj.append(static_cast<const __CHARTYPE*>(last_start));
+    return strobj;
   }
 
 /**
  * @brief Search the text and replace the matched token with 
  * the specified string in place
  * 
- * @param str 
- * @param size 
- * @param rep 
- * @param count 
- * @param casesensitive 
+ * @param str string to be checked
+ * @param size buffer size in bytes
+ * @param rep replacement string
+ * @param flags parsing flags
+ * @param count number of replacements
  */
   void Replace(__CHARTYPE* str, unsigned long size
         , const __CHARTYPE* rep
-        , unsigned int count = 1
-        , bool casesensitive = true) {
+        , unsigned long flags = 0
+        , unsigned int count = 1) {
   RETURN_VOID_IF_NULL(str);
   RETURN_VOID_IF_NULL(rep);
-  STRING ret = Replace(str, rep, count, casesensitive);
-  strncpy(str, ret.c_str(), size);
+  STRING ret = Replace(str, rep, flags, count);
+  memcpy(str, ret.c_str(), size* sizeof(__CHARTYPE));
+  str[size] = 0;
+
   }
 
 /**
  * @brief Split the string base on separator specified in the rule  
  * 
- * @param str 
- * @param vector 
- * @param flags 
- * @param dropEmpty 
- * @param count 
- * @param caseSensitive 
+ * @param str string to be splitted
+ * @param vector string array of parts
+ * @param flags parsing flags
+ * @param dropEmpty drop empty occurances
+ * @param count number of splitting operations (splits +1)
  * @return true 
  * @return false 
  */
@@ -2188,7 +2216,6 @@ class Stringozzi {
     , unsigned long flags = 0
     , bool dropEmpty = true
     , unsigned int count = 1) {
-    
     RETURN_FALSE_IF_NULL(str);
 
     Core::Context<__CHARTYPE> context(str, flags);
@@ -2214,7 +2241,7 @@ class Stringozzi {
   vector<STRING> Split(__CHARTYPE* str) {
     vector<string> vec;
     RETURN_IF_NULL(str, vec);
-    SplitAll(str, vec);
+    Split(str, vec);
     return vec;
   }
 };
@@ -2244,8 +2271,8 @@ class PlaceHolder {
   }
 
 
-  void Inject(const Core::Rule& r) {
-    _ref->Set(r);
+  void Inject(const Core::Rule& rule) {
+    _ref->Set(rule);
   }
 };
 }  // namespace Utils
