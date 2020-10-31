@@ -16,7 +16,7 @@ script:
     - cmake -DSTRINGOZZI_TRAVIS_BUILD=TRUE ..
     - cmake --build .
     - cppcheck  --verbose --enable=all ../src/*.cpp ../include/*.h ../test/*.cpp
-    - .. bin.tmp/Linux/Release/x64/stringozzi.test
+    - ../bin.tmp/Linux/Release/x64/stringozzi.test
     - doxygen ../docs/Doxyfile
 
 after_success:

@@ -356,7 +356,7 @@ class Matches {
 
     MATCH& match = vec.at(index);
     if (match.Index == -1) {
-      unsigned int size = static_cast<const __CHARTYPE*>(match.End)
+      size_t size = static_cast<const __CHARTYPE*>(match.End)
                 - static_cast<const __CHARTYPE*>(match.Start);
       _matchesStrings.push_back(STRING((__CHARTYPE*)match.Start, size));
       match.Index = _matchesStrings.size() - 1;
@@ -368,9 +368,9 @@ class Matches {
   /**
    * @brief return the number of keys in the matches table
    * 
-   * @return unsigned int number of keys in the matches table
+   * @return size_t  number of keys in the matches table
    */
-  unsigned int NumberOfMatches() {
+  size_t NumberOfMatches() {
     return _matchesMap.size();
   }
 
@@ -380,7 +380,7 @@ class Matches {
  * @param key the input token key  
  * @return int  the number of entries 
  */
-  int NumberOfMatches(const char* key) {
+  size_t NumberOfMatches(const char* key) {
     typename MAP::iterator it = _matchesMap.find(key);
     if (it == _matchesMap.end())
       return 0;
