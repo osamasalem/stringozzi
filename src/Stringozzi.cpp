@@ -411,7 +411,7 @@ DLL_PUBLIC void RefValidator::Set(const Core::Rule &rule) {
 }  // namespace Manipulators
 
 namespace Core {
-DLL_PUBLIC Rule Rule::operator=(const Rule &other) {
+DLL_PUBLIC Rule& Rule::operator=(const Rule &other) {
   if (_strValid)
     _strValid->Release();
   _strValid = other._strValid;

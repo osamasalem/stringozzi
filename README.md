@@ -115,8 +115,8 @@ int main(int argc, char** argv)
 | CaseSensitive | this will set case sensitive mode in parsing process |
 | CaseSensitive | this will set case insensitive mode in parsing process |
 | SetVar(_[varname]_, _[value]_) | this will  match all the time .. this sets a flag/variable with specified value.. if no value is supplied the default will be ```1``` |
-| DelVar(_[varname]_) | this will match always .. this is remove flag/variable  |
-| If(_varname_,[_value_]) | checks if the sored named ```varname``` equals the specified value.. if no value speicified the default value will be ```1``` |
+| DelVar(_[varname]_) | this will match always .. removes/unset flag/variable  |
+| If(_varname_,[_value_]) | checks if the stored named variable ```varname``` equals the specified value.. if no value speicified the default value will be ```1``` |
 
 
 
@@ -150,7 +150,7 @@ the basic operation you can do with Stringozzi
   ```cpp
   Actions::Test(In("ABC"), "A")
   ```
-2. **FastMatch**: like test but returns the related matches
+2. **FastMatch**: like ```Test``` but returns the related matches
   ```cpp
   MatchesA m;
   Actions::FastMatch(In("ABC") >> "Match" , "A", m)

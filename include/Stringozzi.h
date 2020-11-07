@@ -518,14 +518,14 @@ class ContextInterface {
    *                   -1 if current char lesser than the input character
    *                    0 if they are equal
    */
-  virtual const int Compare(SChar chr) = 0;
+  virtual int Compare(SChar chr) = 0;
 
   /**
    * @brief Get the character under parsing cursor in UTF32
    * 
    * @return const SChar returns the character under parsing cursor in UTF32
    */
-  virtual const SChar Get() = 0;
+  virtual SChar Get() = 0;
 
   /**
    * @brief Get the current cursor position
@@ -615,19 +615,19 @@ class Context : public ContextInterface {
   Utils::Matches<__CHARTYPE> _matches;
   MAP _vars;
 
-  inline const SChar _Get() {
+  inline SChar _Get() {
     SChar chr = Utils::GetChar(_pointer);
     return _Get(chr);
   }
 
-  inline const SChar _Get(SChar chr) {
+  inline SChar _Get(SChar chr) {
     if (_flags.IsFlagSet(SPEG_CASEINSENSITIVE))
       return Utils::CharToLower(chr);
     return chr;
   }
 
  public:
-  virtual const SChar Get() {
+  virtual SChar Get() {
     SChar chr = Utils::GetChar(_pointer);
     return _Get(chr);
   }
@@ -679,7 +679,7 @@ class Context : public ContextInterface {
   }
 
 
-  virtual const int Compare(SChar chr) {
+  virtual int Compare(SChar chr) {
     SChar local = _Get();
     SChar other = _Get(chr);
     if (local > other)
@@ -1358,7 +1358,7 @@ class Rule {
   * @param other RHS Rule 
   * @return DLL_PUBLIC LHS Rule
   */
-  DLL_PUBLIC Rule operator=(const Rule& other);
+  DLL_PUBLIC Rule& operator=(const Rule& other);
   Rule() : _strValid(
     new Manipulators::NotValidator(
       new Primitives::AnyValidator())) {}
@@ -2157,8 +2157,8 @@ class Stringozzi {
   STRING Replace(const __CHARTYPE* str, const __CHARTYPE* rep
     , unsigned long flags = 0
     , unsigned int count = 1 ) {
-    RETURN_IF_NULL(str, (__CHARTYPE*) "\0\0\0\0");
-    RETURN_IF_NULL(rep, (__CHARTYPE*) "\0\0\0\0");
+    RETURN_IF_NULL(str, STRING());
+    RETURN_IF_NULL(rep, STRING());
 
     Core::Context<__CHARTYPE> context(str, flags);
     Core::Position last_start = str;
