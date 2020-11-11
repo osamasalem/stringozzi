@@ -1361,7 +1361,9 @@ class Rule {
   DLL_PUBLIC Rule& operator=(const Rule& other);
   Rule() : _strValid(
     new Manipulators::NotValidator(
-      new Primitives::AnyValidator())) {}
+      new Primitives::AnyValidator())) {
+        _strValid->AddReference();
+    }
 
   Rule(StringValidator* obj) {
     _strValid = obj;

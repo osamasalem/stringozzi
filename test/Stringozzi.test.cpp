@@ -44,7 +44,7 @@ using namespace SPEG::Operators;
 using namespace SPEG::Actions;
 
 TEST(Operators, TestIs) {
-  ASSERT_TRUE (Actions::Test(Is("TEST") > End , "TEST"));
+  ASSERT_TRUE(Actions::Test(Is("TEST") > End , "TEST"));
   ASSERT_FALSE(Actions::Test(Is(NULL) > End , "TEST"));
   ASSERT_FALSE(Actions::Test(Is<char>(NULL) > End , "TEST"));
   ASSERT_FALSE(Actions::Test(Is("KKKK") > End , "TEST"));
@@ -53,11 +53,11 @@ TEST(Operators, TestIs) {
 }
 
 TEST(Operators, TestIn) {
-  ASSERT_TRUE (Actions::Test(+In("XYZ") > End , "ZXYZ"));
+  ASSERT_TRUE(Actions::Test(+In("XYZ") > End , "ZXYZ"));
   ASSERT_FALSE(Actions::Test(+In<char>(NULL) > End , "ZXYZ"));
   ASSERT_FALSE(Actions::Test(+In("XYZ") > End , "TEST"));
   ASSERT_FALSE(Actions::Test(+In("XYZ") > End , "zxyz"));
-  ASSERT_TRUE (Actions::Test(+In("XYZ") > End , "zxyz" , SPEG_CASEINSENSITIVE));
+  ASSERT_TRUE(Actions::Test(+In("XYZ") > End , "zxyz" , SPEG_CASEINSENSITIVE));
 }
 
 TEST(Operators, TestSkip) {
@@ -227,6 +227,9 @@ TEST(Manipulators, TestLookBack) {
           .SearchAndGetPtr("aaa:ccc bbb dddd"), NULL);
   ASSERT_STREQ(StringozziA((Is('a') & LookBack(Is("aa"))))
           .SearchAndGetPtr("aaa:ccc bbb dddd"), "a:ccc bbb dddd");
+  ASSERT_STREQ(StringozziW((Is('a') & LookBack(Is("aa"))))
+          .SearchAndGetPtr(L"aaa:ccc bbb dddd"), L"a:ccc bbb dddd");
+
 }
 
 TEST(Manipulators, TestRecursiveByRef) {
@@ -300,7 +303,7 @@ TEST(Manipulators, TestifMatched) {
 
 TEST(Manipulators, TestExtract) {
   MatchesA m;
-  ASSERT_TRUE(StringozziA((*(Is("o") >> "O")) > (Is("s") >> "S")
+  ASSERT_TRUE(StringozziA((*(Is("o") >> "O")) > (Extract(Is("s"), "S"))
           > (Extract(Is("j"))) > End).Match("   OOO  SJ    "
           , m, SPEG_CASEINSENSITIVE | SPEG_IGNORESPACES));
   ASSERT_EQ(m.NumberOfMatches(), 4);
@@ -386,7 +389,7 @@ TEST(Manipulators, TestOneOrMore) {
   ASSERT_TRUE(StringozziA(OneOrMore(Is('K')) > End).Test("KKKKK"));
   ASSERT_TRUE(StringozziA(3 + Is("ABC") > End).Test("ABCABCABC"));
   ASSERT_TRUE(StringozziA(Is("ABC") + 4 > End).Test("ABCABCABC"));
-  ASSERT_FALSE(StringozziA(2 + Is("ABC") > End).Test("ABCABCABC"));
+  ASSERT_FALSE(StringozziA(OneOrMore(Is("ABC"), 2) > End).Test("ABCABCABC"));
   ASSERT_FALSE(StringozziA(+Is("ABC") > End).Test("ABCABCAB"));
   ASSERT_FALSE(StringozziA(+Is("ABC") > End).Test("ABCABABC"));
   ASSERT_TRUE(StringozziA(+Is("ABC")).Test("ABCABCAB"));
@@ -427,7 +430,7 @@ TEST(Manipulators, TestTimes) {
               .Test("     Text"));
   ASSERT_FALSE(StringozziA(6 * WhiteSpace > Is("Text") > End)
               .Test("       Text"));
-  ASSERT_TRUE(StringozziA(4 * Is("AB") > End).Test("ABABABAB"));
+  ASSERT_TRUE(StringozziA(Times(Is("AB"), 4) > End).Test("ABABABAB"));
   ASSERT_FALSE(StringozziA(Range(1, 3) * Is("A") > End).Test(""));
   ASSERT_TRUE(StringozziA(Range(1, 3) * Is("A") > End).Test("A"));
   ASSERT_TRUE(StringozziA(Range(1, 3) * Is("A") > End).Test("AA"));
@@ -514,12 +517,22 @@ TEST(Primitives, TestIn) {
 }
 
 TEST(Primitives, TestAny) {
+
   ASSERT_TRUE(Actions::Test(Any, "A"));
   ASSERT_TRUE(Actions::Test(Any, "a"));
   ASSERT_TRUE(Actions::Test(Any, "1"));
   ASSERT_TRUE(Actions::Test(Any, "#"));
   ASSERT_TRUE(Actions::Test(Any, "\x1"));
   ASSERT_FALSE(Actions::Test(Any, ""));
+}
+
+TEST(Primitives, TestRuleConstructor) {
+  ASSERT_FALSE(Actions::Test(Rule(), "A"));
+  ASSERT_FALSE(Actions::Test(Rule(), "a"));
+  ASSERT_FALSE(Actions::Test(Rule(), "1"));
+  ASSERT_FALSE(Actions::Test(Rule(), "#"));
+  ASSERT_FALSE(Actions::Test(Rule(), "\x1"));
+  ASSERT_TRUE(Actions::Test(Rule(), ""));
 }
 
 

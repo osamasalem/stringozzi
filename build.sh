@@ -31,4 +31,4 @@ cmake --build . --config Release
 cd ..
 
 
-bin.tmp/Linux/Debug/x86/stringozzi.test
+bin.tmp/Linux/Debug/x64/stringozzi.test

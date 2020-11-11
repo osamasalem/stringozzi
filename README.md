@@ -1,7 +1,7 @@
 # Stringozzi
 
 ### _Serving efficiently, Served with :sparkling_heart:_
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![Build Status](https://travis-ci.org/osamasalem/stringozzi.svg?branch=master)](https://travis-ci.org/osamasalem/stringozzi)  [![codecov](https://codecov.io/gh/osamasalem/stringozzi/branch/master/graph/badge.svg)](https://codecov.io/gh/osamasalem/stringozzi)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![Build Status](https://travis-ci.org/osamasalem/stringozzi.svg?branch=master)](https://travis-ci.org/osamasalem/stringozzi)  [![codecov](https://codecov.io/gh/osamasalem/stringozzi/branch/master/graph/badge.svg)](https://codecov.io/gh/osamasalem/stringozzi)[![Language grade: C/C++](https://img.shields.io/lgtm/grade/cpp/g/osamasalem/stringozzi.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/osamasalem/stringozzi/context:cpp)
 
 
 **C++ Parsing Expression grammar library for parsing/searching/validating strings similar to RegEx**
@@ -279,3 +279,12 @@ The rule of the thumb here ... keep the whole parsing cycle in the same thread..
 A. Yes the internal 'to lower' function is ASCII only for now
 it is probable to add ICU lib to support such a function in near future ... ( just I don't like to overcomplicate things)
 
+## Contribution
+
+if there is any problem or bug .. take a look on the issues first and check if it is already reported and follow up with this ticket .. if not, it will be a pleasure to file a new issue [here](https://github.com/osamasalem/stringozzi/issues)
+
+Sure you can fork the clone and fork the source code and create a pull request 
+
+## License
+
+This software is licensed under [MIT](https://opensource.org/licenses/MIT)
