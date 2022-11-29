@@ -1,7 +1,7 @@
 # Stringozzi
 
 ### _Serving efficiently, Served with :sparkling_heart:_
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![Build Status](https://travis-ci.org/osamasalem/stringozzi.svg?branch=master)](https://travis-ci.org/osamasalem/stringozzi)  [![codecov](https://codecov.io/gh/osamasalem/stringozzi/branch/master/graph/badge.svg)](https://codecov.io/gh/osamasalem/stringozzi)[![Language grade: C/C++](https://img.shields.io/lgtm/grade/cpp/g/osamasalem/stringozzi.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/osamasalem/stringozzi/context:cpp)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)  [![Build Status](https://travis-ci.org/osamasalem/stringozzi.svg?branch=master)](https://travis-ci.org/osamasalem/stringozzi)  [![codecov](https://codecov.io/gh/osamasalem/stringozzi/branch/master/graph/badge.svg)](https://codecov.io/gh/osamasalem/stringozzi)  [![Language grade: C/C++](https://img.shields.io/lgtm/grade/cpp/g/osamasalem/stringozzi.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/osamasalem/stringozzi/context:cpp)
 
 
 **C++ Parsing Expression grammar library for parsing/searching/validating strings similar to RegEx**
@@ -42,17 +42,17 @@ The idea of this project comes from the need to a library that the user can buil
 
 Is equivalent to 
  ```cpp
-Rule z = *(5 * (In("XYZ")) > ~Is('X') > +WhiteSpace > Enclosed(3 * (Is("AB")), "<", ">")) > End;
+Rule z = *(5 * (In("XYZ")) > ~Is('X') > +WhiteSpace() > Enclosed(3 * (Is("AB")), "<", ">")) > End();
 ...
 StringozziA(z).Test("ZXYZZ <ABABAB>")
  ```
   Or structured ones like these
 ```cpp
 const Rule Verb = (Is("GET") | Is("POST"));
-const Rule URI = Is("http://") > *(Any & !WhiteSpace);
-const Rule RequestLine = Verb > URI > Is("HTTP/2.0") > EndOfLine;
-const Rule Header =  *(Any & !WhiteSpaces) >  Is(":") > *(Any & !WhiteSpaces)
-const Rule Request = RequestLine > *(Headers) > EndOfLine > Content;
+const Rule URI = Is("http://") > *(Any() & !WhiteSpace());
+const Rule RequestLine = Verb > URI > Is("HTTP/2.0") > EndOfLine();
+const Rule Header =  *(Any() & !WhiteSpaces()) >  Is(":") > *(Any() & !WhiteSpaces())
+const Rule Request = RequestLine > *(Headers) > EndOfLine() > Content;
 ...
 ```
 
@@ -78,7 +78,7 @@ For Linux
 #include <Stringozzi.h>
 int main(int argc, char** argv) 
 {
-  const Rule r = Is("Student No#:") > (Range(1,3) * Digit);
+  const Rule r = Is("Student No#:") > (Range(1,3) * Digit());
 
   Actions::Test(r, "Student No#: 434");
 }
@@ -87,13 +87,13 @@ int main(int argc, char** argv)
 
 | Rule | Description |
 |-|-|
-| Any | Any character |
-| Digit | Any numeric character between '0' and '9'|
-| Alphabet | Any character between 'A' and 'Z'|
-| Alphanumeric | ```Digit``` or ```Alphabet```|
-| Whitespace | Any space character |
-| Beginning | Matches the beginning of text |
-| End | Matches the end of text (i.e. ```'\0'```)
+| Any() | Any character |
+| Digit() | Any numeric character between '0' and '9'|
+| Alphabet() | Any character between 'A' and 'Z'|
+| Alphanumeric() | ```Digit``` or ```Alphabet```|
+| Whitespace() | Any space character |
+| Beginning() | Matches the beginning of text |
+| End() | Matches the end of text (i.e. ```'\0'```)
 | _a_>_b_ | Parsing sequentially using rule _a_ first then rule _b_ |
 | !_a_ | Negate parsing rule _a_, this action does not move parsing pointer |
 | _a_&_b_ | Boolean "And" operation: Rule _a_ and Rule _b_ must be matched, the token must comply with both rules, and apply the most relevant one |
@@ -112,8 +112,8 @@ int main(int argc, char** argv)
 | Until(_rule_) | Skip the characters till it matches the _rule_, it requires the next token to match _rule_  |
 | LookAhead(_rule_) | it peeks the next token and checks if it matches _rule_, it does not move parsing pointer |
 | LookBack(_rule_) | it peeks the previous token and checks if it matches _rule_, it does not move parsing pointer |
-| CaseSensitive | this will set case sensitive mode in parsing process |
-| CaseSensitive | this will set case insensitive mode in parsing process |
+| CaseSensitive() | this will set case sensitive mode in parsing process |
+| CaseSensitive() | this will set case insensitive mode in parsing process |
 | SetVar(_[varname]_, _[value]_) | this will  match all the time .. this sets a flag/variable with specified value.. if no value is supplied the default will be ```1``` |
 | DelVar(_[varname]_) | this will match always .. removes/unset flag/variable  |
 | If(_varname_,[_value_]) | checks if the stored named variable ```varname``` equals the specified value.. if no value speicified the default value will be ```1``` |
@@ -250,7 +250,7 @@ we will face matching the parentheses properly.. the problem in such situations 
 this is a better way .. ```Ref``` operator receives rule reference and wait for parsing to evaluate it .. the down side here is that the developer must maintain the lifetime of the reference while parsing takes place
 
 ```cpp
-Rule r = Is('(') > (*Any | Ref(r) ) Is(')');
+Rule r = Is('(') > (*Any() | Ref(r) ) Is(')');
 ```
 
 #### **2- Better: ```Ref``` operator with PlaceHolder**
@@ -260,7 +260,7 @@ Placeholder is a special object that fill the reference gap in expression .. and
 Take a look
 ```cpp
 Placeholder ph;
-Rule r = Is('(') > (*Any | Ref(ph) ) Is(')');
+Rule r = Is('(') > (*Any() | Ref(ph) ) Is(')');
 ph.Inject(r);
 ```
 

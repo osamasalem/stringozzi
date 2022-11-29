@@ -103,6 +103,9 @@ typedef char char8_t;
 #define DLL_PUBLIC __declspec(dllexport)
 #define DLL_PUBLIC_VAR __declspec(dllexport)
 #endif  // GNUC__
+#elif defined EMBEDDED_SOURCE
+#define DLL_PUBLIC 
+#define DLL_PUBLIC_VAR 
 #else  // !BUILDING_DLL
 #ifdef __GNUC__
 #define DLL_PUBLIC __attribute__ ((dllimport))
@@ -114,7 +117,7 @@ typedef char char8_t;
 #endif  // BUILDING_DLL
 #define DLL_LOCAL
 #else  // !defined _WIN32 && !defined __CYGWIN__
-#if __GNUC__ >= 4
+#if __GNUC__ >= 4 || !defined EMBEDDED_SOURCE
 #define DLL_PUBLIC __attribute__ ((visibility ("default")))
 #define DLL_PUBLIC_VAR
 #define DLL_LOCAL  __attribute__ ((visibility ("hidden")))
@@ -276,6 +279,12 @@ DLL_PUBLIC void SafeIncrement(unsigned long* pnum);
  * @param pnum a pointer to double word string  
  */
 DLL_PUBLIC void SafeDecrement(unsigned long* pnum);
+/**
+ * @brief Cross platform check if zero
+ * 
+ * @param pnum a pointer to double word string  
+ */
+DLL_PUBLIC bool SafeIfZero(unsigned long* pnum);
 
 
 /**
@@ -359,7 +368,7 @@ class Matches {
       size_t size = static_cast<const __CHARTYPE*>(match.End)
                 - static_cast<const __CHARTYPE*>(match.Start);
       _matchesStrings.push_back(STRING((__CHARTYPE*)match.Start, size));
-      match.Index = _matchesStrings.size() - 1;
+      match.Index = (int)_matchesStrings.size() - 1;
     }
 
     return _matchesStrings[match.Index].c_str();
@@ -646,8 +655,14 @@ class Context : public ContextInterface {
 
   virtual Position AdjustPosition() {
     if (_flags.IsFlagSet(SPEG_IGNORESPACES)) {
-      while (Compare(' ') == 0) {
-        Forward();
+      while (true) {
+        SChar chr = _Get();
+        if (chr != ' ' 
+            && chr != '\t' 
+            && chr != '\n' 
+            && chr != '\r' 
+            || !Forward() )
+          break;
       }
     }
     return _pointer;
@@ -695,7 +710,7 @@ class Context : public ContextInterface {
   }
 
   virtual unsigned int NumberOfMatches(const char* key) {
-    return _matches.NumberOfMatches(key);
+    return (unsigned int)_matches.NumberOfMatches(key);
   }
 
   inline Position GetPosition() {
@@ -834,7 +849,8 @@ class BinaryValidator : public NormalValidator {
 
  public:
   BinaryValidator(StringValidator* op1, StringValidator* op2)
-    : FirstOperand(op1), SecondOperand(op2) {
+    : FirstOperand(op1)
+    , SecondOperand(op2) {
     op1->AddReference();
     op2->AddReference();
   }
@@ -1212,6 +1228,37 @@ class ExtractValidator : public Core::UnaryValidator {
   virtual bool Check(Core::ContextInterface* context) const;
 };
 
+/**
+ * @brief callback definition prototype
+ */
+typedef void(*CALLBACKFUNCTION)(Core::Position start
+	, Core::Position end
+	, void* context);
+
+/**
+ * @brief if the input rule matches ... the matched token is passed to function
+ *
+ */
+
+class CallBackValidator : public Core::UnaryValidator
+{
+	CALLBACKFUNCTION _func;
+	void* _cbcontext;
+
+public:
+	explicit CallBackValidator(Core::StringValidator* op
+		, CALLBACKFUNCTION func
+		, void* ctx)
+		: Core::UnaryValidator(op)
+		, _func(func)
+		, _cbcontext(ctx)
+	{}
+
+
+	virtual bool Check(Core::ContextInterface* context) const;
+
+};
+
 
 /**
  * @brief used in circular recursive rules .. it points to uninitialized rule
@@ -1222,8 +1269,9 @@ class RefValidator : public Core::NormalValidator {
   const Core::Rule* _rule;
  public:
   RefValidator() : _rule(NULL), _validator(NULL) {}
-  explicit RefValidator(const Core::Rule& rule) : _rule(&rule)
-          , _validator(NULL) {}
+  explicit RefValidator(const Core::Rule& rule) 
+	  : _rule(&rule)
+      , _validator(NULL) {}
 
   virtual bool Check(Core::ContextInterface* context) const;
   DLL_PUBLIC void Set(const Core::Rule& rule);
@@ -1349,7 +1397,7 @@ namespace Core {
    * 
    */
 class Rule {
-  Core::StringValidator* _strValid;
+  mutable Core::StringValidator* _strValid;
 
  public:
  /**
@@ -1361,12 +1409,12 @@ class Rule {
   DLL_PUBLIC Rule& operator=(const Rule& other);
   Rule() : _strValid(
     new Manipulators::NotValidator(
-      new Primitives::AnyValidator())) {
+      new Primitives::AnyValidator()) ) {
         _strValid->AddReference();
     }
 
-  Rule(StringValidator* obj) {
-    _strValid = obj;
+  Rule(StringValidator* obj)
+  : _strValid(obj){
     _strValid->AddReference();
   }
 
@@ -1698,168 +1746,168 @@ DLL_PUBLIC Rule LookBack(const Rule& rule);
  * @brief Any
  * 
  */
-DLL_PUBLIC_VAR extern const Rule Any;
+DLL_PUBLIC const Rule Any();
 
 /**
  * @brief 0->9 
  * 
  */
-DLL_PUBLIC_VAR extern const Rule Digit;
+DLL_PUBLIC const Rule Digit();
 
 /**
  * @brief a->z
  * 
  */
-DLL_PUBLIC_VAR extern const Rule SmallAlphabet;
+DLL_PUBLIC const Rule SmallAlphabet();
 
 /**
  * @brief A->Z
  * 
  */
-DLL_PUBLIC_VAR extern const Rule CapitalAlphabet;
+DLL_PUBLIC const Rule CapitalAlphabet();
 
 /**
  * @brief a->z or A->Z
  * 
  */
-DLL_PUBLIC_VAR extern const Rule Alphabet;
+DLL_PUBLIC const Rule Alphabet();
 
 /**
  * @brief a->z or A->Z or 0->9
  * 
  */
-DLL_PUBLIC_VAR extern const Rule Alphanumeric;
+DLL_PUBLIC const Rule Alphanumeric();
 
 /**
  * @brief End of text : lorem ipsum ... EOT.
  * 
  */
-DLL_PUBLIC_VAR extern const Rule End;
+DLL_PUBLIC const Rule End();
 
 /**
  * @brief Beginning of Text : BOT ...lorem ipsum
  * 
  */
-DLL_PUBLIC_VAR extern const Rule Beginning;
+DLL_PUBLIC const Rule Beginning();
 
 /**
  * @brief Not Alphanumeric
  * 
  */
-DLL_PUBLIC_VAR extern const Rule Symbol;
+DLL_PUBLIC const Rule Symbol();
 
 /**
  * @brief 0->9 or A-F 
  * 
  */
-DLL_PUBLIC_VAR extern const Rule Hex;
+DLL_PUBLIC const Rule Hex();
 
 /**
  * @brief 0->7
  * 
  */
-DLL_PUBLIC_VAR extern const Rule Octet;
+DLL_PUBLIC const Rule Octet();
 
 /**
  * @brief Beginning of line .....\n 
  * 
  */
-DLL_PUBLIC_VAR extern const Rule BeginningOfLine;
+DLL_PUBLIC const Rule BeginningOfLine();
 
 /**
  * @brief CRLF or LF or CR 
  * 
  */
-DLL_PUBLIC_VAR extern const Rule EndOfLine;
+DLL_PUBLIC const Rule EndOfLine();
 
 /**
  * @brief SPACE or TAB or NEWLINE 
  * 
  */
-DLL_PUBLIC_VAR extern const Rule WhiteSpace;
+DLL_PUBLIC const Rule WhiteSpace();
 
 /**
  * @brief One or more Whitespaces 
  * 
  */
-DLL_PUBLIC_VAR extern const Rule WhiteSpaces;
+DLL_PUBLIC const Rule WhiteSpaces();
 
 /**
  * @brief 0 or 1 !! 
  * 
  */
-DLL_PUBLIC_VAR extern const Rule Binary;
+DLL_PUBLIC const Rule Binary();
 /**
  * @brief last letter in word (word<<)
  * 
  */
-DLL_PUBLIC_VAR extern const Rule WordEnd;
+DLL_PUBLIC const Rule WordEnd();
 
 /**
  * @brief first lteer in word (>>word) 
  * 
  */
-DLL_PUBLIC_VAR extern const Rule WordStart;
+DLL_PUBLIC const Rule WordStart();
 
 /**
  * @brief Natural: {1, 2, 3, 4,...} 
  * 
  */
-DLL_PUBLIC_VAR extern const Rule Natural;
+DLL_PUBLIC const Rule Natural();
 
 /**
  * @brief Integer {..,-2,-1,0,1,2,...} 
  * 
  */
-DLL_PUBLIC_VAR extern const Rule Integer;
+DLL_PUBLIC const Rule Integer();
 
 /**
  * @brief Rational Number {-2.0,... ,1.0 ,1.5,1.53} 
  * 
  */
-DLL_PUBLIC_VAR extern const Rule Rational;
+DLL_PUBLIC const Rule Rational();
 
 /**
  * @brief Scenific Number like +2.034e+12
  * 
  */
-DLL_PUBLIC_VAR extern const Rule Scientific;
+DLL_PUBLIC const Rule Scientific();
 
 /**
  * @brief IP v4 Address 11.22.33.44 
  * 
  */
-DLL_PUBLIC_VAR extern const Rule IPv4;
+DLL_PUBLIC const Rule IPv4();
 
 /**
  * @brief IP v6 Address  
  * 
  */
-DLL_PUBLIC_VAR extern const Rule IPv6;
+DLL_PUBLIC const Rule IPv6();
 
 /**
  * @brief Server host
  * 
  */
-DLL_PUBLIC_VAR extern const Rule Host;
+DLL_PUBLIC const Rule Host();
 
 /**
  * @brief To case sensitive
  * 
  */
-DLL_PUBLIC_VAR extern const Rule CaseSensitive;
+DLL_PUBLIC const Rule CaseSensitive();
 
 /**
  * @brief To case insensitive 
  * 
  */
-DLL_PUBLIC_VAR extern const Rule CaseInsensitive;
+DLL_PUBLIC const Rule CaseInsensitive();
 
 /**
  * @brief In chain like A..B..C 
  * 
  */
-DLL_PUBLIC_VAR extern const Rule InChain;
+DLL_PUBLIC const Rule InChain();
 
 
 /**
@@ -1871,7 +1919,7 @@ DLL_PUBLIC_VAR extern const Rule InChain;
  */
 template<typename __CHARTYPE>
 Rule Out(const __CHARTYPE* set) {
-  return Any & Not(In(set));
+  return Any() & Not(In(set));
 }
 
 /**
@@ -1915,6 +1963,16 @@ DLL_PUBLIC Rule Extract(const Rule& rule, const char* key);
  */
 DLL_PUBLIC Rule Extract(const Rule& rule);
 
+/**
+ * @brief extract to callback
+ *
+ * @param rule
+ * @return DLL_PUBLIC
+ */
+
+DLL_PUBLIC Rule CallBack(const Rule &rule
+	, Manipulators::CALLBACKFUNCTION func
+	, void* ctx);
 
 /**
  * @brief the rule is enclosed between quote symbol 

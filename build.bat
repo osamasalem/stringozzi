@@ -26,9 +26,15 @@ cd ..
 
 doxygen docs\Doxyfile
 
-xcopy docs\html dist\doc /E /I
-xcopy include dist\include /E /I
-xcopy src dist\src /E /I
-copy README.md dist
-copy LICENSE.md dist
+xcopy docs\html dist\doc /E /I /y
+xcopy include dist\include /E /I /y
+xcopy src dist\src /E /I /y
+copy README.md dist /y
+copy LICENSE.md dist /y
+
+bin.tmp\Windows\Debug\x86\stringozzi.test.exe
+bin.tmp\Windows\Debug\x64\stringozzi.test.exe
+bin.tmp\Windows\Release\x86\stringozzi.test.exe
+bin.tmp\Windows\Release\x64\stringozzi.test.exe
+
 

@@ -133,6 +133,10 @@ DLL_PUBLIC void SafeDecrement(unsigned long *num) {
   InterlockedDecrement(num);
 }
 
+DLL_PUBLIC bool SafeIfZero(unsigned long* pnum) {
+  return InterlockedCompareExchange(pnum, *pnum, 0) == 0;
+}
+
 #elif defined __GNUC__
 
 DLL_PUBLIC void SafeIncrement(unsigned long *num) {
@@ -143,6 +147,10 @@ DLL_PUBLIC void SafeDecrement(unsigned long *num) {
   __sync_fetch_and_sub(num, 1);
 }
 
+DLL_PUBLIC bool SafeIfZero(unsigned long* pnum) {
+  return __sync_bool_compare_and_swap (pnum, 0, *pnum);
+}
+
 #else
 
 DLL_PUBLIC void SafeIncrement(unsigned long *num) {
@@ -151,6 +159,10 @@ DLL_PUBLIC void SafeIncrement(unsigned long *num) {
 
 DLL_PUBLIC void SafeDecrement(unsigned long *num) {
   (*num)--;
+}
+
+DLL_PUBLIC bool SafeIfZero(unsigned long* pnum) {
+  return *pnum == 0;
 }
 
 #endif
@@ -164,7 +176,7 @@ DLL_PUBLIC void NormalValidator::AddReference() {
 
 DLL_PUBLIC void NormalValidator::Release() {
   Utils::SafeDecrement(&_referenceCount);
-  if (!_referenceCount) {
+  if (Utils::SafeIfZero(&_referenceCount)) {
     this->Dispose();
     delete this;
   }
@@ -185,6 +197,7 @@ bool SeqValidator::Check(Core::ContextInterface* context) const {
   Core::Position start = context->GetPosition();
 
   if (FirstOperand->Check(context)) {
+	  context->AdjustPosition();
     if (SecondOperand->Check(context)) {
       context->AddMatch(start);
       return true;
@@ -302,6 +315,16 @@ bool ExtractValidator::Check(Core::ContextInterface* context) const {
   return false;
 }
 
+bool CallBackValidator::Check(Core::ContextInterface* context) const {
+	Core::Position pos = context->GetPosition();
+	if (Operand->Check(context)) {
+		_func(pos, context->GetPosition(), _cbcontext);
+		return true;
+	}
+	return false;
+}
+
+
 }  // namespace Manipulators
 
 namespace Primitives {
@@ -310,7 +333,6 @@ bool BOTValidator::Check(Core::ContextInterface* context) const {
 }
 
 bool AnyValidator::Check(Core::ContextInterface* context) const {
-  context->AdjustPosition();
   Core::Position start = context->GetPosition();
   if (context->Forward()) {
     context->AddMatch(start);
@@ -320,7 +342,6 @@ bool AnyValidator::Check(Core::ContextInterface* context) const {
 }
 
 bool InChainValidator::Check(Core::ContextInterface* context) const {
-  context->AdjustPosition();
   Core::Position start = context->GetPosition();
   SChar curr = context->Get();
   if (context->Backward()) {
@@ -397,7 +418,7 @@ bool RefValidator::Check(Core::ContextInterface* context) const {
     }
   }
 
-  if (_validator->Check(context)) {
+  if (_validator && _validator->Check(context)) {
     context->AddMatch(start);
     return true;
   }
@@ -538,102 +559,118 @@ DLL_PUBLIC Rule LookBack(const Rule &rule) {
   return new Manipulators::LookBackValidator(rule.Get());
 }
 
-DLL_PUBLIC_VAR const Rule Any = new Primitives::AnyValidator();
+DLL_PUBLIC const Rule Any() 
+{ 
+	static Rule rule = new Primitives::AnyValidator();
+	return rule;
+}
 
-DLL_PUBLIC_VAR const Rule Digit = Between("09");
+DLL_PUBLIC const Rule Digit() { return Between("09"); }
 
-DLL_PUBLIC_VAR const Rule SmallAlphabet = Between("az");
+DLL_PUBLIC const Rule SmallAlphabet() { return  Between("az"); }
 
-DLL_PUBLIC_VAR const Rule CapitalAlphabet = Between("AZ");
+DLL_PUBLIC const Rule CapitalAlphabet() { return  Between("AZ"); }
 
-DLL_PUBLIC_VAR const Rule Alphabet = CapitalAlphabet | SmallAlphabet;
+DLL_PUBLIC const Rule Alphabet() { return CapitalAlphabet() | SmallAlphabet(); }
 
-DLL_PUBLIC_VAR const Rule Alphanumeric = Digit | Alphabet;
+DLL_PUBLIC const Rule Alphanumeric() { return Digit() | Alphabet(); }
 
-DLL_PUBLIC_VAR const Rule End = Is('\0');
+DLL_PUBLIC const Rule End() { return Is('\0'); }
 
-DLL_PUBLIC_VAR const Rule Beginning = new Primitives::BOTValidator();
+DLL_PUBLIC const Rule Beginning() { 
+	static Rule rule = new Primitives::BOTValidator();
+	return rule;
+}
 
-DLL_PUBLIC_VAR const Rule Symbol = Any & !Alphanumeric;
+DLL_PUBLIC const Rule Symbol() { return Any() & !Alphanumeric(); }
 
-DLL_PUBLIC_VAR const Rule Hex = Digit | Between("af") | Between("AF");
+DLL_PUBLIC const Rule Hex() { return Digit() | Between("af") | Between("AF"); }
 
-DLL_PUBLIC_VAR const Rule Octet = Between("07");
+DLL_PUBLIC const Rule Octet() { return Between("07"); }
 
-DLL_PUBLIC_VAR const Rule EndOfLine = Is("\r\n") | In("\n\r");
+DLL_PUBLIC const Rule EndOfLine() { return Is("\r\n") | In("\n\r"); }
 
-DLL_PUBLIC_VAR const Rule BeginningOfLine = Beginning | LookBack(EndOfLine);
+DLL_PUBLIC const Rule BeginningOfLine() { return Beginning() | LookBack(EndOfLine()); }
 
-DLL_PUBLIC_VAR const Rule WhiteSpace = In(" \t\r\n");
+DLL_PUBLIC const Rule WhiteSpace() { return In(" \t\r\n"); }
 
-DLL_PUBLIC_VAR const Rule WhiteSpaces = +WhiteSpace;
+DLL_PUBLIC const Rule WhiteSpaces() { return +WhiteSpace(); }
 
-DLL_PUBLIC_VAR const Rule Binary = In("01");
+DLL_PUBLIC const Rule Binary() { return In("01"); }
 
-DLL_PUBLIC_VAR const Rule WordEnd = LookAhead(!Alphanumeric);
+DLL_PUBLIC const Rule WordEnd() { return LookAhead(!Alphanumeric()); }
 
-DLL_PUBLIC_VAR const Rule WordStart = LookBack(!Alphanumeric);
+DLL_PUBLIC const Rule WordStart() { return LookBack(!Alphanumeric()); }
 
-DLL_PUBLIC_VAR const Rule Natural = +Digit;
+DLL_PUBLIC const Rule Natural() { return +Digit(); }
 
-DLL_PUBLIC_VAR const Rule Integer = ~In("+-") > Natural;
+DLL_PUBLIC const Rule Integer() { return  ~In("+-") > Natural(); }
 
-DLL_PUBLIC_VAR const Rule Rational = Integer > ~(Is('.') > Natural);
+DLL_PUBLIC const Rule Rational() { return Integer() > ~(Is('.') > Natural()); }
 
-DLL_PUBLIC_VAR const Rule Scientific = Rational
-                                        > ~(In("Ee") > In("+-")
-                                        > Natural);
+DLL_PUBLIC const Rule Scientific() {
+	return Rational() > ~(In("Ee") > In("+-") > Natural());
+}
 
-DLL_PUBLIC_VAR const Rule InChain = new Primitives::InChainValidator();
-
-const Rule DecOctet = (Is("25") > Between("05"))|
-                      (Is('2') > Between("04") > Digit) |
-                      (Is('1') > (2 * Digit)) |
-                      (Between("19") > Digit) |
-                      Digit;
-
-DLL_PUBLIC_VAR const Rule IPv4 = DecOctet > ((Is('.') > DecOctet) * 3);
-
-const Rule h16 = Utils::Range(1, 4) * Hex;
-
-const Rule COLON = Is(':');
-
-const Rule DBLCOLON = Is("::");
-
-const Rule h16Colon = h16 > COLON;
-
-const Rule ls32 = (h16Colon > h16) | IPv4;
+DLL_PUBLIC const Rule InChain() { 
+	static Rule rule = new Primitives::InChainValidator(); 
+	return rule;
+}
 
 
-DLL_PUBLIC_VAR const Rule IPv6 =
-     ((6 * (h16Colon)) > ls32)
-  || (DBLCOLON > (5 * (h16Colon)) > ls32)
-  || (~h16 > DBLCOLON > (4 * (h16Colon)) > ls32)
-  || (~((1 * (h16Colon)) > h16) > DBLCOLON > (3 * (h16Colon)) > ls32)
-  || (~((2 * (h16Colon)) > h16) > DBLCOLON >    (2 * (h16Colon)) > ls32)
-  || (~((3 * (h16Colon)) > h16) > DBLCOLON >    (1 * (h16Colon)) > ls32)
-  || (~((4 * (h16Colon)) > h16) > DBLCOLON                       > ls32)
-  || (~((5 * (h16Colon)) > h16) > DBLCOLON > h16)
-  || (~((6 * (h16Colon)) > h16) > DBLCOLON);
+DLL_PUBLIC const Rule IPv4() {
+
+	const Rule DecOctet = (Is("25") > Between("05")) |
+		(Is('2') > Between("04") > Digit()) |
+		(Is('1') > (2 * Digit())) |
+		(Between("19") > Digit()) |
+		Digit();
+
+	return DecOctet > ((Is('.') > DecOctet) * 3);
+}
 
 
 
+DLL_PUBLIC const Rule IPv6() {
+	const Rule h16 = Utils::Range(1, 4) * Hex();
+
+	const Rule COLON = Is(':');
+
+	const Rule DBLCOLON = Is("::");
+
+	const Rule h16Colon = h16 > COLON;
+
+	const Rule ls32 = (h16Colon > h16) | IPv4();
+
+	return ((6 * (h16Colon)) > ls32)
+		|| (DBLCOLON > (5 * (h16Colon)) > ls32)
+		|| (~h16 > DBLCOLON > (4 * (h16Colon)) > ls32)
+		|| (~((1 * (h16Colon)) > h16) > DBLCOLON > (3 * (h16Colon)) > ls32)
+		|| (~((2 * (h16Colon)) > h16) > DBLCOLON > (2 * (h16Colon)) > ls32)
+		|| (~((3 * (h16Colon)) > h16) > DBLCOLON > (1 * (h16Colon)) > ls32)
+		|| (~((4 * (h16Colon)) > h16) > DBLCOLON > ls32)
+		|| (~((5 * (h16Colon)) > h16) > DBLCOLON > h16)
+		|| (~((6 * (h16Colon)) > h16) > DBLCOLON);
+}
 
 
-const Rule Host = (+((Is('%') > Hex > Hex)
-          | Alphanumeric
-          | In("-_.~!$&'()*+,;=")))
-          || IPv4
-          || IPv6;
 
+
+DLL_PUBLIC const Rule Host() {
+	return (+((Is('%') > Hex() > Hex())
+		| Alphanumeric()
+		| In("-_.~!$&'()*+,;=")))
+		|| IPv4()
+		|| IPv6();
+}
 
 
 DLL_PUBLIC Rule SkipTo(const Rule &rule) {
-  return ZeroOrMore(Any & Not(rule));
+  return ZeroOrMore(Any() & Not(rule));
 }
 
 DLL_PUBLIC Rule SkipTo(const unsigned long count) {
-  return count * Any;
+  return count * Any();
 }
 
 DLL_PUBLIC Rule Until(const Rule &rule) {
@@ -647,6 +684,12 @@ DLL_PUBLIC Rule Extract(const Rule &rule, const char *key) {
 
 DLL_PUBLIC Rule Extract(const Rule &rule) {
   return new Manipulators::ExtractValidator(rule.Get());
+}
+
+DLL_PUBLIC Rule CallBack(const Rule &rule
+	, Manipulators::CALLBACKFUNCTION func
+	, void* ctx) {
+	return new Manipulators::CallBackValidator(rule.Get(), func, ctx);
 }
 
 DLL_PUBLIC Rule Enclosed(const Rule &rule, const char *quote) {
@@ -663,10 +706,13 @@ DLL_PUBLIC Rule Enclosed(const Rule &rule, const char *open
   return Is(open) > rule > Is(close);
 }
 
-DLL_PUBLIC_VAR const Rule CaseSensitive =
-            new StateKeepers::CaseModifier(false);
-DLL_PUBLIC_VAR const Rule CaseInsensitive =
-            new StateKeepers::CaseModifier(true);
+DLL_PUBLIC const Rule CaseSensitive() {
+	return new StateKeepers::CaseModifier(false);
+}
+
+DLL_PUBLIC const Rule CaseInsensitive() {
+	return new StateKeepers::CaseModifier(true);
+}
 
 DLL_PUBLIC Rule Set(const char *flag) {
   RETURN_IF_NULL(flag, Rule());
