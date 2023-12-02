@@ -37,4 +37,3 @@ bin.tmp\Windows\Debug\x64\stringozzi.test.exe
 bin.tmp\Windows\Release\x86\stringozzi.test.exe
 bin.tmp\Windows\Release\x64\stringozzi.test.exe
 
-
